@@ -1,0 +1,92 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Select city",
+        "description": "Choose the city or settlement where your address is located.",
+        "data": {
+          "city": "City"
+        }
+      },
+      "street": {
+        "title": "Select street",
+        "description": "Choose the street in {city}.",
+        "data": {
+          "street": "Street"
+        }
+      },
+      "house": {
+        "title": "Select house",
+        "description": "Choose the house number on {street}, {city}.",
+        "data": {
+          "house_num": "House number"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "description": "Configure update settings for {street}, {house}, {city}.",
+        "data": {
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "scan_interval": "How often to check DTEK for outage updates. Default is 300 seconds (5 minutes). Minimum 60 seconds, maximum 3600 seconds (1 hour)."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to DTEK website. Please try again later.",
+      "no_data": "No data received from DTEK. Please try again later.",
+      "no_streets": "No streets found for the selected city.",
+      "no_houses": "No houses found for the selected street. You can enter the number manually.",
+      "invalid_city": "City not found in the DTEK database. Please select from the list.",
+      "invalid_street": "Street not found in the DTEK database. Please select from the list."
+    },
+    "abort": {
+      "already_configured": "This address is already configured."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "power": {
+        "name": "Power"
+      }
+    },
+    "sensor": {
+      "status": {
+        "name": "Outage status",
+        "state": {
+          "ok": "OK",
+          "emergency": "Emergency outage",
+          "planned": "Planned outage",
+          "stabilization": "Stabilization outage"
+        }
+      },
+      "outage_description": {
+        "name": "Outage description"
+      },
+      "outage_start": {
+        "name": "Outage start"
+      },
+      "outage_end": {
+        "name": "Outage end"
+      },
+      "schedule_group": {
+        "name": "Schedule group"
+      },
+      "last_update": {
+        "name": "DTEK last update"
+      },
+      "schedule_changed": {
+        "name": "Schedule changed"
+      }
+    },
+    "calendar": {
+      "outage_schedule": {
+        "name": "Outage schedule"
+      },
+      "possible_schedule": {
+        "name": "Possible outage schedule"
+      }
+    }
+  }
+}

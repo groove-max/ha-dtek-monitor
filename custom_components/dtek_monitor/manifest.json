@@ -1,0 +1,12 @@
+{
+  "domain": "dtek_monitor",
+  "name": "DTEK Monitor",
+  "codeowners": ["@groove-max"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/groove-max/ha-dtek-monitor",
+  "homeassistant": "2026.3.0",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}
