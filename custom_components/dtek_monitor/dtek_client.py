@@ -40,6 +40,9 @@ class DTEKAuthError(DTEKApiError):
     """CSRF or session error — need to re-authenticate."""
 
 
+SESSION_MAX_AGE = timedelta(hours=1)
+
+
 class DTEKClient:
     """Async HTTP client for DTEK OEM shutdowns API.
 
@@ -51,6 +54,8 @@ class DTEKClient:
         self._session = session
         self._csrf_token: str | None = None
         self._schedule_data: dict[str, Any] | None = None
+        self._session_created: datetime | None = None
+        self._schedule_dirty: bool = False
 
     async def close(self) -> None:
         """Close the underlying HTTP session."""
@@ -59,7 +64,12 @@ class DTEKClient:
     async def _ensure_session(self) -> None:
         """Fetch the shutdowns page to obtain CSRF token and session cookie."""
         if self._csrf_token is not None:
-            return
+            if (
+                self._session_created
+                and datetime.now(KYIV_TZ) - self._session_created < SESSION_MAX_AGE
+            ):
+                return
+            _LOGGER.debug("Session expired (age > %s), refreshing", SESSION_MAX_AGE)
 
         await self._refresh_session()
 
@@ -86,6 +96,7 @@ class DTEKClient:
                     raise DTEKAuthError("CSRF token not found in page HTML")
 
                 self._csrf_token = match.group(1)
+                self._session_created = datetime.now(KYIV_TZ)
 
                 # Cookies are handled automatically by aiohttp CookieJar
 
@@ -93,11 +104,13 @@ class DTEKClient:
                 schedule = _parse_schedule_from_html(html)
                 if schedule:
                     self._schedule_data = schedule
+                    self._schedule_dirty = True
 
                 _LOGGER.debug("DTEK session refreshed")
 
         except aiohttp.ClientError as err:
             self._csrf_token = None
+            self._session_created = None
             raise DTEKApiError(f"Network error loading DTEK page: {err}") from err
 
     async def _post(
@@ -136,6 +149,7 @@ class DTEKClient:
                     if retry:
                         _LOGGER.debug("Got 400, refreshing CSRF and retrying")
                         self._csrf_token = None
+                        self._session_created = None
                         await self._refresh_session()
                         return await self._post(data, retry=False,
                                                 require_result=require_result)
@@ -231,6 +245,13 @@ class DTEKClient:
     def get_schedule_data(self) -> dict[str, Any] | None:
         """Return cached schedule data (fact + preset)."""
         return self._schedule_data
+
+    def consume_schedule_update(self) -> dict[str, Any] | None:
+        """Return schedule data if it was refreshed since last consume, else None."""
+        if self._schedule_dirty and self._schedule_data:
+            self._schedule_dirty = False
+            return self._schedule_data
+        return None
 
     @staticmethod
     def parse_house_data(api_response: dict[str, Any], house_num: str) -> dict[str, Any]:

@@ -83,11 +83,10 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         outage_data = DTEKClient.parse_house_data(api_response, self.house)
 
-        # Load initial schedule from client cache (parsed from HTML on session init)
-        if not self._schedule_fact and not self._schedule_preset:
-            schedule = self.client.get_schedule_data()
-            if schedule:
-                self._apply_schedule(schedule)
+        # Apply schedule data refreshed from HTML (on session init or refresh)
+        html_schedule = self.client.consume_schedule_update()
+        if html_schedule:
+            self._apply_schedule(html_schedule)
 
         # Check for schedule updates via API
         if self._schedule_update_time:
@@ -124,13 +123,21 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Apply new schedule data from HTML parse or API update."""
         if "fact" in schedule:
             fact = schedule["fact"]
-            self._schedule_fact = fact.get("data", {})
+            data = fact.get("data", {})
+            if isinstance(data, dict):
+                self._schedule_fact = data
+            else:
+                _LOGGER.warning("Unexpected fact data type: %s", type(data).__name__)
             update_time = fact.get("update", "")
             if update_time:
                 self._schedule_update_time = update_time
         if "preset" in schedule:
             preset = schedule["preset"]
-            self._schedule_preset = preset.get("data", {})
+            data = preset.get("data", {})
+            if isinstance(data, dict):
+                self._schedule_preset = data
+            else:
+                _LOGGER.warning("Unexpected preset data type: %s", type(data).__name__)
             update_time = preset.get("updateFact", "")
             if update_time and not self._schedule_update_time:
                 self._schedule_update_time = update_time
@@ -197,6 +204,8 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         blocks: list[tuple[str, int, int]] = []
 
         # Check fact data for this specific date
+        if not isinstance(self._schedule_fact, dict):
+            self._schedule_fact = {}
         for ts_str, day_data in self._schedule_fact.items():
             try:
                 ts = int(ts_str)
