@@ -5,8 +5,8 @@
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/groove-max/ha-dtek-monitor",
-  "issue_tracker": "https://github.com/groove-max/ha-dtek-monitor/issues",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/groove-max/ha-dtek-monitor/issues",
   "requirements": [],
   "version": "1.2.0"
 }
