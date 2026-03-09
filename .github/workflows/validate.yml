@@ -17,4 +17,6 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          # Custom integration brand assets are shipped locally since HA 2026.3+.
+          # The upstream home-assistant/brands repository no longer accepts them.
           ignore: brands

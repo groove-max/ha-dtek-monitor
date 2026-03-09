@@ -120,6 +120,7 @@ The primary schedule group sensor also exposes the complete `schedule_groups` li
 - Home Assistant `2026.3.0` or newer
 
 Brand assets are bundled locally in `custom_components/dtek_monitor/brand/`, so no external icon hosting is required.
+Since Home Assistant `2026.3.0`, custom integrations are expected to ship their own brand assets, and `home-assistant/brands` no longer accepts new brand submissions for custom integrations.
 
 ## Development
 
@@ -261,6 +262,7 @@ python -m compileall custom_components tests
 - Home Assistant `2026.3.0` або новіше
 
 Брендові ресурси постачаються локально в `custom_components/dtek_monitor/brand/`, тому зовнішній хостинг іконок не потрібен.
+Починаючи з Home Assistant `2026.3.0`, кастомні інтеграції мають постачати такі ресурси самостійно, а репозиторій `home-assistant/brands` більше не приймає нові брендові асети для кастомних інтеграцій.
 
 ## Розробка
 
