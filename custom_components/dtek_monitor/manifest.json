@@ -6,7 +6,6 @@
   "dependencies": [],
   "documentation": "https://github.com/groove-max/ha-dtek-monitor",
   "issue_tracker": "https://github.com/groove-max/ha-dtek-monitor/issues",
-  "homeassistant": "2026.3.0",
   "iot_class": "cloud_polling",
   "requirements": [],
   "version": "1.2.0"
