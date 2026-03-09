@@ -14,9 +14,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import (
+    ATTR_OUTAGE_DESCRIPTION,
+    ATTR_OUTAGE_END,
+    ATTR_OUTAGE_START,
+    ATTR_OUTAGE_TYPE,
+    ATTR_PRIMARY_SCHEDULE_GROUP,
+    ATTR_SCHEDULE_GROUPS,
+)
 from .coordinator import DTEKDataCoordinator
-from .helpers import build_device_info
+from .helpers import build_device_info, build_entity_unique_id
 
 POWER_DESCRIPTION = BinarySensorEntityDescription(
     key="power",
@@ -31,7 +38,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up DTEK binary sensors from a config entry."""
-    coordinator: DTEKDataCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: DTEKDataCoordinator = entry.runtime_data
     async_add_entities([DTEKPowerBinarySensor(coordinator, entry)])
 
 
@@ -51,7 +58,7 @@ class DTEKPowerBinarySensor(
         super().__init__(coordinator)
         self.entity_description = POWER_DESCRIPTION
 
-        self._attr_unique_id = f"{entry.entry_id}_power"
+        self._attr_unique_id = build_entity_unique_id(entry, "power")
         self._attr_device_info = build_device_info(entry)
 
     @property
@@ -69,16 +76,18 @@ class DTEKPowerBinarySensor(
 
         data = self.coordinator.data
         attrs: dict[str, Any] = {
-            "outage_type": data.get("outage_type", "ok"),
-            "schedule_groups": data.get("schedule_groups", []),
+            ATTR_OUTAGE_TYPE: data.get("outage_type", "ok"),
+            ATTR_SCHEDULE_GROUPS: data.get("schedule_groups", []),
         }
+        if data.get("primary_schedule_group"):
+            attrs[ATTR_PRIMARY_SCHEDULE_GROUP] = data["primary_schedule_group"]
 
         if data.get("outage_start"):
-            attrs["outage_start"] = data["outage_start"].isoformat()
+            attrs[ATTR_OUTAGE_START] = data["outage_start"].isoformat()
         if data.get("outage_end"):
-            attrs["outage_end"] = data["outage_end"].isoformat()
+            attrs[ATTR_OUTAGE_END] = data["outage_end"].isoformat()
         if data.get("outage_description"):
-            attrs["outage_description"] = data["outage_description"]
+            attrs[ATTR_OUTAGE_DESCRIPTION] = data["outage_description"]
 
         outage_count = data.get("outage_count", 0)
         if outage_count > 1:

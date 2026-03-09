@@ -45,6 +45,20 @@
       "already_configured": "This address is already configured."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "description": "Update runtime settings for this DTEK address.",
+        "data": {
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "scan_interval": "How often to check DTEK for outage updates. Changes apply immediately after the integration reloads."
+        }
+      }
+    }
+  },
   "entity": {
     "binary_sensor": {
       "power": {
@@ -71,7 +85,10 @@
         "name": "Outage end"
       },
       "schedule_group": {
-        "name": "Schedule group"
+        "name": "Primary schedule group"
+      },
+      "schedule_groups": {
+        "name": "All schedule groups"
       },
       "last_update": {
         "name": "DTEK last update"

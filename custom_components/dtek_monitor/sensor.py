@@ -17,10 +17,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
 from .coordinator import DTEKDataCoordinator
 from .dtek_client import parse_dtek_datetime
-from .helpers import build_device_info
+from .helpers import build_device_info, build_entity_unique_id
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -28,6 +27,7 @@ class DTEKSensorEntityDescription(SensorEntityDescription):
     """Describes a DTEK sensor entity."""
 
     value_fn: Callable[[dict[str, Any]], str | datetime | None]
+    attributes_fn: Callable[[dict[str, Any]], dict[str, Any]] | None = None
 
 
 SENSOR_DESCRIPTIONS: tuple[DTEKSensorEntityDescription, ...] = (
@@ -63,6 +63,17 @@ SENSOR_DESCRIPTIONS: tuple[DTEKSensorEntityDescription, ...] = (
         key="schedule_group",
         translation_key="schedule_group",
         icon="mdi:format-list-group",
+        value_fn=lambda data: data.get("primary_schedule_group"),
+        attributes_fn=lambda data: (
+            {"schedule_groups": data.get("schedule_groups", [])}
+            if data.get("schedule_groups")
+            else {}
+        ),
+    ),
+    DTEKSensorEntityDescription(
+        key="schedule_groups",
+        translation_key="schedule_groups",
+        icon="mdi:format-list-bulleted-square",
         value_fn=lambda data: ", ".join(data.get("schedule_groups", [])) or None,
     ),
     DTEKSensorEntityDescription(
@@ -92,7 +103,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up DTEK sensors from a config entry."""
-    coordinator: DTEKDataCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: DTEKDataCoordinator = entry.runtime_data
 
     async_add_entities(
         DTEKSensor(coordinator, entry, description)
@@ -116,7 +127,7 @@ class DTEKSensor(CoordinatorEntity[DTEKDataCoordinator], SensorEntity):
         super().__init__(coordinator)
         self.entity_description = description
 
-        self._attr_unique_id = f"{entry.entry_id}_{description.key}"
+        self._attr_unique_id = build_entity_unique_id(entry, description.key)
         self._attr_device_info = build_device_info(entry)
 
     @property
@@ -125,3 +136,10 @@ class DTEKSensor(CoordinatorEntity[DTEKDataCoordinator], SensorEntity):
         if self.coordinator.data is None:
             return None
         return self.entity_description.value_fn(self.coordinator.data)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return optional sensor attributes."""
+        if self.coordinator.data is None or self.entity_description.attributes_fn is None:
+            return {}
+        return self.entity_description.attributes_fn(self.coordinator.data)

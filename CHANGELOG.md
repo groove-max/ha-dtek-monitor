@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-03-09
+
+### Added
+
+- Automatic registry migration for upgrades from `1.1.x`, moving entities and devices from config-entry-based identifiers to address-based stable identifiers while preserving existing `entity_id` values.
+- An options flow for changing the polling interval without removing and re-adding the integration.
+- A dedicated sensor for the full list of schedule groups reported by DTEK.
+- Regression tests covering HTML schedule extraction, schedule merging, and registry migration helpers.
+
+### Changed
+
+- Refactored schedule handling into a dedicated pure domain layer, centralizing outage merging, overlap resolution, and next-event lookup in a testable module.
+- Entity and device registry identifiers are now based on the address `unique_id` instead of the transient config entry ID.
+- The primary schedule group is now exposed separately from the full schedule group list.
+
+### Fixed
+
+- Runtime HTTP sessions are now created through Home Assistant helpers, closed correctly on setup failure, and reloaded automatically when options change.
+- Preserved all schedule groups reported by DTEK instead of collapsing to the first group, so calendars and attributes no longer silently lose data.
+- Corrected fact-vs-preset schedule merging: preset windows are now trimmed around overlapping fact windows rather than only skipping exact duplicates.
+- Calendar entities now search the full weekly schedule horizon instead of only looking ahead 48 hours.
+- HTML schedule parsing now uses brace matching instead of greedy regex extraction, making it more resilient to site markup changes.
+
 ## [1.1.0] - 2026-03-07
 
 ### Fixed

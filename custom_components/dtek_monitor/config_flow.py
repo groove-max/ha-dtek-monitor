@@ -8,7 +8,8 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import (
     NumberSelector,
@@ -55,7 +56,13 @@ def _combo_select(options: list[str]) -> SelectSelector:
 class DTEKMonitorConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for DTEK Monitor."""
 
-    VERSION = 1
+    VERSION = 2
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Return the options flow for this handler."""
+        return DTEKMonitorOptionsFlow(config_entry)
 
     def __init__(self) -> None:
         """Initialize the config flow."""
@@ -266,3 +273,51 @@ def _natural_sort_key(value: str) -> tuple:
         else:
             result.append((1, 0, part.lower()))
     return tuple(result)
+
+
+class DTEKMonitorOptionsFlow(OptionsFlow):
+    """Handle DTEK Monitor options."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize the options flow."""
+        self._config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage runtime options for an existing entry."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title="",
+                data={
+                    CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                },
+            )
+
+        current_interval = int(
+            self._config_entry.options.get(
+                CONF_SCAN_INTERVAL,
+                self._config_entry.data.get(
+                    CONF_SCAN_INTERVAL,
+                    DEFAULT_SCAN_INTERVAL_SECONDS,
+                ),
+            )
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=current_interval,
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=MIN_SCAN_INTERVAL_SECONDS,
+                        max=MAX_SCAN_INTERVAL_SECONDS,
+                        step=30,
+                        unit_of_measurement="s",
+                        mode=NumberSelectorMode.SLIDER,
+                    )
+                ),
+            }),
+        )

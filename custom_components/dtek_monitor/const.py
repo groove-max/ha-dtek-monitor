@@ -28,9 +28,12 @@ ATTR_OUTAGE_DESCRIPTION = "outage_description"
 ATTR_OUTAGE_START = "outage_start"
 ATTR_OUTAGE_END = "outage_end"
 ATTR_SCHEDULE_GROUPS = "schedule_groups"
+ATTR_PRIMARY_SCHEDULE_GROUP = "primary_schedule_group"
 ATTR_LAST_UPDATE = "last_update"
 
 EVENT_SUMMARY_OUTAGE = "Планове відключення"
 EVENT_SUMMARY_POSSIBLE = "Можливе відключення"
 EVENT_DESCRIPTION_PLANNED = "Planned"
 EVENT_DESCRIPTION_POSSIBLE = "Possible"
+
+DEFAULT_NEXT_EVENT_LOOKAHEAD_DAYS = 8

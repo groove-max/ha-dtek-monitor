@@ -6,6 +6,7 @@ import json
 import logging
 import re
 from datetime import datetime, timedelta
+from http.cookies import SimpleCookie
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -46,20 +47,28 @@ SESSION_MAX_AGE = timedelta(hours=1)
 class DTEKClient:
     """Async HTTP client for DTEK OEM shutdowns API.
 
-    Handles CSRF token acquisition and all API methods.
-    Requires a dedicated aiohttp.ClientSession with its own CookieJar.
+    Handles CSRF token acquisition, session cookies, and all API methods.
+    Can run on either a dedicated or HA-managed aiohttp session.
     """
 
-    def __init__(self, session: aiohttp.ClientSession) -> None:
+    def __init__(
+        self,
+        session: aiohttp.ClientSession,
+        *,
+        close_session: bool = False,
+    ) -> None:
         self._session = session
+        self._close_session = close_session
         self._csrf_token: str | None = None
+        self._cookies: dict[str, str] = {}
         self._schedule_data: dict[str, Any] | None = None
         self._session_created: datetime | None = None
         self._schedule_dirty: bool = False
 
     async def close(self) -> None:
         """Close the underlying HTTP session."""
-        await self._session.close()
+        if self._close_session and not self._session.closed:
+            await self._session.close()
 
     async def _ensure_session(self) -> None:
         """Fetch the shutdowns page to obtain CSRF token and session cookie."""
@@ -96,9 +105,8 @@ class DTEKClient:
                     raise DTEKAuthError("CSRF token not found in page HTML")
 
                 self._csrf_token = match.group(1)
+                self._cookies = _extract_cookies(resp)
                 self._session_created = datetime.now(KYIV_TZ)
-
-                # Cookies are handled automatically by aiohttp CookieJar
 
                 # Parse schedule data embedded in HTML <script> tags
                 schedule = _parse_schedule_from_html(html)
@@ -137,6 +145,9 @@ class DTEKClient:
             "X-Csrf-Token": self._csrf_token,
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         }
+        cookie_header = _format_cookie_header(self._cookies)
+        if cookie_header:
+            headers["Cookie"] = cookie_header
 
         try:
             async with self._session.post(
@@ -149,6 +160,7 @@ class DTEKClient:
                     if retry:
                         _LOGGER.debug("Got 400, refreshing CSRF and retrying")
                         self._csrf_token = None
+                        self._cookies = {}
                         self._session_created = None
                         await self._refresh_session()
                         return await self._post(data, retry=False,
@@ -270,17 +282,25 @@ class DTEKClient:
             "outage_start": None,
             "outage_end": None,
             "schedule_groups": [],
+            "primary_schedule_group": None,
             "dtek_update_time": update_timestamp,
             "raw_type": "",
             "outage_count": 0,
             "all_outages": [],
         }
 
+        if not isinstance(houses, dict):
+            _LOGGER.warning(
+                "Unexpected DTEK houses payload type: %s",
+                type(houses).__name__,
+            )
+            return no_outage
+
         house_data = houses.get(house_num)
         if house_data is None:
             # Try case-insensitive match
             for key, value in houses.items():
-                if key.lower() == house_num.lower():
+                if isinstance(key, str) and key.lower() == house_num.lower():
                     house_data = value
                     break
 
@@ -325,6 +345,11 @@ class DTEKClient:
 
         if not outages:
             no_outage["schedule_groups"] = list(dict.fromkeys(all_groups))
+            no_outage["primary_schedule_group"] = (
+                no_outage["schedule_groups"][0]
+                if no_outage["schedule_groups"]
+                else None
+            )
             return no_outage
 
         # Select primary outage: most severe, then most recent start
@@ -339,6 +364,7 @@ class DTEKClient:
             "outage_start": primary["outage_start"],
             "outage_end": primary["outage_end"],
             "schedule_groups": merged_groups,
+            "primary_schedule_group": merged_groups[0] if merged_groups else None,
             "dtek_update_time": update_timestamp,
             "raw_type": primary["raw_type"],
             "outage_count": len(outages),
@@ -389,14 +415,14 @@ def _parse_single_outage(entry: dict[str, Any]) -> dict[str, Any]:
     raw_type = entry.get("type", "")
     start_str = entry.get("start_date", "")
     end_str = entry.get("end_date", "")
-    groups = entry.get("sub_type_reason", [])
+    groups = _normalize_groups(entry.get("sub_type_reason", []))
 
     return {
         "outage_type": _classify_outage_type(sub_type),
         "outage_description": sub_type,
         "outage_start": parse_dtek_datetime(start_str),
         "outage_end": parse_dtek_datetime(end_str),
-        "schedule_groups": groups if isinstance(groups, list) else [],
+        "schedule_groups": groups,
         "raw_type": raw_type,
     }
 
@@ -418,17 +444,6 @@ def _select_primary_outage(outages: list[dict[str, Any]]) -> dict[str, Any]:
 
 # --- Schedule parsing from HTML ---
 
-# Regex to extract JS object assignments: DisconSchedule.fact = {...}
-# The JSON is on a single line, may or may not have trailing semicolon,
-# and may be followed by </script> or newline.
-_SCHEDULE_FACT_RE = re.compile(
-    r"DisconSchedule\.fact\s*=\s*(\{.+\})"
-)
-_SCHEDULE_PRESET_RE = re.compile(
-    r"DisconSchedule\.preset\s*=\s*(\{.+\})"
-)
-
-
 def _parse_schedule_from_html(html: str) -> dict[str, Any] | None:
     """Extract DisconSchedule.fact and DisconSchedule.preset from page HTML.
 
@@ -436,14 +451,91 @@ def _parse_schedule_from_html(html: str) -> dict[str, Any] | None:
     """
     result: dict[str, Any] = {}
 
-    for name, pattern in [("fact", _SCHEDULE_FACT_RE), ("preset", _SCHEDULE_PRESET_RE)]:
-        match = pattern.search(html)
-        if not match:
+    for name in ("fact", "preset"):
+        payload = _extract_js_object(html, f"DisconSchedule.{name}")
+        if payload is None:
             _LOGGER.debug("DisconSchedule.%s not found in HTML", name)
             continue
         try:
-            result[name] = json.loads(match.group(1))
+            result[name] = json.loads(payload)
         except (json.JSONDecodeError, ValueError) as err:
             _LOGGER.warning("Failed to parse DisconSchedule.%s: %s", name, err)
 
     return result or None
+
+
+def _normalize_groups(value: Any) -> list[str]:
+    """Normalize schedule groups into a clean string list."""
+    if isinstance(value, str):
+        normalized = value.strip()
+        return [normalized] if normalized else []
+    if not isinstance(value, list):
+        return []
+
+    groups: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            continue
+        normalized = item.strip()
+        if normalized:
+            groups.append(normalized)
+    return groups
+
+
+def _extract_cookies(response: aiohttp.ClientResponse) -> dict[str, str]:
+    """Extract response cookies into a plain dict."""
+    cookies: dict[str, str] = {}
+    for raw_cookie in response.headers.getall("Set-Cookie", []):
+        parsed = SimpleCookie()
+        parsed.load(raw_cookie)
+        for name, morsel in parsed.items():
+            cookies[name] = morsel.value
+    return cookies
+
+
+def _format_cookie_header(cookies: dict[str, str]) -> str:
+    """Convert a cookie mapping into a Cookie header value."""
+    return "; ".join(f"{name}={value}" for name, value in cookies.items())
+
+
+def _extract_js_object(html: str, assignment_name: str) -> str | None:
+    """Extract a JSON object assigned to a JS variable using brace matching."""
+    assignment_index = html.find(assignment_name)
+    if assignment_index == -1:
+        return None
+
+    start = html.find("{", assignment_index)
+    if start == -1:
+        return None
+
+    depth = 0
+    in_string = False
+    string_quote = ""
+    escaped = False
+
+    for index in range(start, len(html)):
+        char = html[index]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == string_quote:
+                in_string = False
+            continue
+
+        if char in {'"', "'"}:
+            in_string = True
+            string_quote = char
+            continue
+
+        if char == "{":
+            depth += 1
+            continue
+
+        if char == "}":
+            depth -= 1
+            if depth == 0:
+                return html[start : index + 1]
+
+    return None
