@@ -7,6 +7,10 @@ Custom Home Assistant integration for monitoring electricity outages in the DTEK
 
 The integration polls the [DTEK OEM shutdowns page](https://www.dtek-oem.com.ua/ua/shutdowns) for the selected address, combines real outage status with planned and possible schedule windows, and exposes the result as Home Assistant sensors and calendars.
 
+## Disclaimer
+
+This integration uses DTEK data published for the selected address and is not an independent source of power telemetry. During emergency outages, network damage, or operational switching, the actual presence of electricity may temporarily differ from what the DTEK service reports. The integration is intended for monitoring and automations based on DTEK data, not for guaranteed confirmation of the physical state of the grid.
+
 ## Highlights
 
 - Real-time outage status with outage type classification
@@ -147,6 +151,10 @@ python -m compileall custom_components tests
 Кастомна інтеграція Home Assistant для моніторингу відключень електроенергії в зоні обслуговування ДТЕК ОЕМ (Одеська область, Україна).
 
 Інтеграція опитує [сторінку відключень ДТЕК ОЕМ](https://www.dtek-oem.com.ua/ua/shutdowns) для вибраної адреси, поєднує поточний стан відключення з плановими та можливими слотами графіка і публікує результат у Home Assistant через сенсори та календарі.
+
+## Дисклеймер
+
+Інтеграція використовує дані ДТЕК, опубліковані для вибраної адреси, і не є незалежним джерелом телеметрії електропостачання. У період аварійних відключень, пошкоджень мережі та оперативних перемикань фактична наявність електроенергії може тимчасово не збігатися з даними сервісу ДТЕК. Інтеграція призначена для моніторингу та автоматизацій на основі даних ДТЕК, а не для гарантованого підтвердження фізичного стану мережі.
 
 ## Основні можливості
 
