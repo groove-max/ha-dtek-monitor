@@ -92,5 +92,6 @@
         "description": "Довідник DTEK Monitor: сутності, календарі, приклади автоматизацій, свіжість даних, резервні копії та розв’язання проблем із підключенням."
       }
     }
-  ]
+  ],
+  "installation_url": "https://my.home-assistant.io/redirect/hacs_repository/?owner=groove-max&repository=ha-dtek-monitor&category=integration"
 }

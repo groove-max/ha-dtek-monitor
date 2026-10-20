@@ -2,6 +2,12 @@
 
 **English** · [Українська](README.uk.md)
 
+[![Open DTEK Monitor in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=groove-max&repository=ha-dtek-monitor&category=integration)
+
+[![Latest release](https://img.shields.io/github/v/release/groove-max/ha-dtek-monitor)](https://github.com/groove-max/ha-dtek-monitor/releases/latest)
+[![Tests](https://github.com/groove-max/ha-dtek-monitor/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/groove-max/ha-dtek-monitor/actions/workflows/tests.yml)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
+
 **DTEK outage schedules, your personal account and meter readings — together in Home Assistant.** Follow your building’s outage groups, view electricity consumption and review readings before sending them to DTEK.
 
 Supports **Odesa oblast, Kyiv city, Kyiv oblast and Dnipropetrovsk oblast** in Ukraine. Address schedules work without a cabinet login; personal-account features are optional.
@@ -10,8 +16,6 @@ Supports **Odesa oblast, Kyiv city, Kyiv oblast and Dnipropetrovsk oblast** in U
 
 ![My DTEK dashboard in Home Assistant: a fictional account, cumulative meter reading, monthly consumption and outage group](docs/images/my-dtek-overview.en.png)
 
-[![HACS custom integration](https://img.shields.io/badge/HACS-custom_integration-41BDF5)](https://hacs.dev/docs/faq/custom_repositories/)
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
 
 Requires **Home Assistant 2026.3.0 or newer**. Available through HACS Custom repositories in the regular release channel. Cabinet features for **Kyiv oblast and Dnipropetrovsk oblast are experimental**; see [regional support](#regions).
 

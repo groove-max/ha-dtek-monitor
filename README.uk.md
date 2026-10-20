@@ -2,6 +2,12 @@
 
 [English](README.md) · **Українська**
 
+[![Відкрити DTEK Monitor у HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=groove-max&repository=ha-dtek-monitor&category=integration)
+
+[![Latest release](https://img.shields.io/github/v/release/groove-max/ha-dtek-monitor)](https://github.com/groove-max/ha-dtek-monitor/releases/latest)
+[![Tests](https://github.com/groove-max/ha-dtek-monitor/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/groove-max/ha-dtek-monitor/actions/workflows/tests.yml)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
+
 **Графіки відключень ДТЕК, особистий кабінет і передача показів — разом у Home Assistant.** Стежте за групами свого будинку, переглядайте споживання електроенергії та перевіряйте покази перед відправленням у ДТЕК.
 
 Підтримуються **Одеська область, місто Київ, Київська та Дніпропетровська області**. Графіки за адресою працюють без входу до кабінету; особисті функції підключаються за бажанням.
@@ -10,8 +16,6 @@
 
 ![Панель «Мій ДТЕК» у Home Assistant: вигаданий рахунок, накопичувальні покази, місячне споживання та група відключень](docs/images/my-dtek-overview.uk.png)
 
-[![Користувацька інтеграція HACS](https://img.shields.io/badge/HACS-custom_integration-41BDF5)](https://hacs.dev/docs/faq/custom_repositories/)
-[![Ліцензія PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
 
 Потрібен **Home Assistant 2026.3.0 або новіший**. Доступно через HACS Custom repositories у звичайному каналі випусків. Кабінети **Київської та Дніпропетровської областей підтримуються експериментально**; докладніше — у [переліку регіонів](#regions).
 

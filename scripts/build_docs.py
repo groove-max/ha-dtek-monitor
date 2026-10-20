@@ -26,6 +26,7 @@ REPOSITORY = SPEC["repository"]
 OUTPUT = ROOT / "build/docs"
 STAGING = ROOT / "build/docs-source"
 LINK = re.compile(r'(!?\[[^\]]*?\]\()([^\s)]+)(\s+"[^"]*")?(\))')
+BADGE = re.compile(r'^(\[!\[[^\]]*\]\([^\n)]+\)\])\(([^\n)]+)\)$', re.M)
 
 
 def routes():
@@ -63,9 +64,8 @@ def prepare_page(page, language):
     # The site header supplies a contextual language switcher. Keep the source
     # language bar for readers on GitHub, but don't repeat it inside each page.
     text = re.sub(r"^.*\[(?:Українська|English)\]\([^\n]+\).*\n", "", text, count=1, flags=re.M)
-    # Repository badges are useful on GitHub; the site already provides its own
-    # navigation and license footer and needs no third-party badge requests.
-    text = re.sub(r"^\[!\[[^\n]+\n", "", text, flags=re.M)
+    # Preserve installation/status badges, including their nested image links.
+    text = BADGE.sub(lambda match: match[1] + "(" + rewrite_url(match[2], source) + ")", text)
     text = LINK.sub(
         lambda match: match[1] + rewrite_url(match[2], source) + (match[3] or "") + match[4],
         text,

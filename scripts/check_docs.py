@@ -62,6 +62,9 @@ def main():
             soup = document(path)
             check(soup.html.get("lang") == language, f"Wrong HTML language: {url}")
             check(len(soup.select("main h1")) == 1, f"Expected one content heading: {url}")
+            if not page["slug"]:
+                install = soup.select_one(f'a[href="{SPEC["installation_url"]}"] img')
+                check(install is not None, f"Missing clickable installation badge: {url}")
             check(soup.select_one('link[rel="canonical"]').get("href") == url, f"Wrong canonical: {url}")
             description = soup.select_one('meta[name="description"]')
             check(description and description.get("content") == page[language]["description"], f"Missing description: {url}")
