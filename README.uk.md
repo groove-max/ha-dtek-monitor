@@ -2,21 +2,20 @@
 
 [English](README.md) · **Українська**
 
-> **2.0.0-rc2 — звичайний випуск GitHub.** Доступний у HACS без увімкнення попередніх версій. Кабінети Київської та Дніпропетровської областей мають експериментальну підтримку.
-> [Встановлення, оновлення та відновлення](docs/UPGRADING.uk.md).
+**Графіки відключень ДТЕК, особистий кабінет і передача показів — разом у Home Assistant.** Стежте за групами свого будинку, переглядайте споживання електроенергії та перевіряйте покази перед відправленням у ДТЕК.
+
+Підтримуються **Одеська область, місто Київ, Київська та Дніпропетровська області**. Графіки за адресою працюють без входу до кабінету; особисті функції підключаються за бажанням.
+
+**[Встановити](docs/UPGRADING.uk.md)** · [Документація](https://groove-max.github.io/ha-dtek-monitor/uk/) · [Останній випуск](https://github.com/groove-max/ha-dtek-monitor/releases/latest) · [Telegram-бот](https://github.com/groove-max/ha-dtek-telegram-bot/blob/main/README.uk.md)
+
+![Панель «Мій ДТЕК» у Home Assistant: вигаданий рахунок, накопичувальні покази, місячне споживання та група відключень](docs/images/my-dtek-overview.uk.png)
 
 [![Користувацька інтеграція HACS](https://img.shields.io/badge/HACS-custom_integration-41BDF5)](https://hacs.dev/docs/faq/custom_repositories/)
 [![Ліцензія PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
 
-Графіки відключень світла ДТЕК, стан відключення за адресою та групи графіків у Home Assistant. Підтримуються **Одеська, Київська, Дніпропетровська області та місто Київ**.
+Потрібен **Home Assistant 2026.3.0 або новіший**. Доступно через HACS Custom repositories у звичайному каналі випусків. Кабінети **Київської та Дніпропетровської областей підтримуються експериментально**; докладніше — у [переліку регіонів](#regions).
 
-Оберіть адресу один раз — і використовуйте сенсори та календарі на панелях Home Assistant і в автоматизаціях. Для роботи інтеграції не потрібні Telegram-бот або фізичний датчик електроенергії.
-
-**Потрібні сповіщення в Telegram?** Додайте [DTEK Telegram Bot](https://github.com/groove-max/ha-dtek-telegram-bot/blob/main/README.uk.md): цей застосунок Home Assistant надсилає зміни графіка, попередження про наближення відключення та оновлює закріплений статус. За наявності локальних датчиків напруги він також може перевіряти фактичну наявність світла.
-
-**Особистий Telegram:** Monitor **2.0.0-rc2** разом із ботом **0.5.0-rc2** надає приватні сповіщення кабінету, нагадування, історію та передачу показів після підтвердження. [Налаштування](docs/PERSONAL_ACCOUNT.uk.md#section-13).
-
-[Встановлення](#installation) · [Налаштування](#setup) · [Значення даних](#data) · [Розв’язання проблем](#troubleshooting) · [Довідник](docs/REFERENCE.uk.md)
+[Додати адресу](#setup) · [Підключити кабінет](#personal-account) · [Значення даних](#data) · [Розв’язання проблем](#troubleshooting)
 
 ## Оберіть потрібний сценарій
 
@@ -67,7 +66,7 @@
 
 1. Відкрийте **HACS → ⋮ → Custom repositories**.
 2. Додайте `https://github.com/groove-max/ha-dtek-monitor`, тип — **Integration**.
-3. Знайдіть **DTEK Monitor** і завантажте **2.0.0-rc2**. Перемикач попередніх версій не потрібен. [Інструкція оновлення](docs/UPGRADING.uk.md).
+3. Знайдіть **DTEK Monitor** і завантажте [останній випуск](https://github.com/groove-max/ha-dtek-monitor/releases/latest). Перемикач попередніх версій не потрібен. [Інструкція оновлення](docs/UPGRADING.uk.md).
 4. Перезапустіть Home Assistant.
 5. Перейдіть до [адреси](#setup) або [особистого кабінету](#personal-account).
 
@@ -77,7 +76,7 @@
 
 ### Вручну
 
-1. Завантажте вихідний код [потрібного випуску](https://github.com/groove-max/ha-dtek-monitor/releases).
+1. Завантажте вихідний код [останнього випуску](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
 2. Скопіюйте всю папку `custom_components/dtek_monitor` у каталог конфігурації Home Assistant, до `custom_components/`.
 3. Переконайтеся, що отримали шлях `custom_components/dtek_monitor/manifest.json`, без зайвої вкладеної папки.
 4. Перезапустіть Home Assistant і виконайте налаштування нижче.
@@ -121,8 +120,6 @@
 звірка з офіційним лічильником, поправки, перевірки за розкладом і нагадування
 описані в [посібнику показів](docs/ENERGY_AND_READINGS.uk.md).
 **Автоматичної передачі показів немає** — кожне надсилання підтверджує адміністратор HA.
-
-![Панель «Мій ДТЕК» із вигаданим рахунком](docs/images/my-dtek-overview.uk.png)
 
 [Повне налаштування кабінету та можливості](docs/PERSONAL_ACCOUNT.uk.md).
 

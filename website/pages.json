@@ -1,0 +1,96 @@
+{
+  "site_url": "https://groove-max.github.io/ha-dtek-monitor/",
+  "repository": "https://github.com/groove-max/ha-dtek-monitor",
+  "pages": [
+    {
+      "slug": "",
+      "en": {
+        "source": "README.md",
+        "label": "Overview",
+        "title": "DTEK for Home Assistant: outage schedules and personal accounts",
+        "description": "Bring DTEK outage schedules, personal accounts, meter readings and energy consumption into Home Assistant. Setup for Odesa, Kyiv and Dnipropetrovsk regions."
+      },
+      "uk": {
+        "source": "README.uk.md",
+        "label": "Огляд",
+        "title": "ДТЕК у Home Assistant: графіки відключень та особистий кабінет",
+        "description": "Графіки відключень ДТЕК, особистий кабінет, передача показів і споживання у Home Assistant. Встановлення для Одеси, Києва, Київської та Дніпропетровської областей."
+      }
+    },
+    {
+      "slug": "installation",
+      "en": {
+        "source": "docs/UPGRADING.md",
+        "label": "Install & update",
+        "title": "Install DTEK Monitor with HACS, update or roll back",
+        "description": "Install DTEK Monitor through HACS or manually. Keep your existing Home Assistant entities, accounts and calibration when updating."
+      },
+      "uk": {
+        "source": "docs/UPGRADING.uk.md",
+        "label": "Встановлення й оновлення",
+        "title": "Як встановити ДТЕК у Home Assistant через HACS",
+        "description": "Встановіть DTEK Monitor через HACS або вручну. Оновлення зі збереженням адрес, рахунків і калібрування, перші перевірки та відновлення попередньої версії."
+      }
+    },
+    {
+      "slug": "personal-account",
+      "en": {
+        "source": "docs/PERSONAL_ACCOUNT.md",
+        "label": "Personal accounts",
+        "title": "Connect your DTEK personal account to Home Assistant",
+        "description": "Set up My DTEK: phone sign-in, SMS registration, multiple accounts, apartment groups, meter details and private Telegram notifications."
+      },
+      "uk": {
+        "source": "docs/PERSONAL_ACCOUNT.uk.md",
+        "label": "Особистий кабінет",
+        "title": "Особистий кабінет ДТЕК у Home Assistant",
+        "description": "Налаштуйте «Мій ДТЕК»: вхід за телефоном, реєстрація через SMS, кілька особових рахунків, група квартири, дані лічильника та особистий Telegram."
+      }
+    },
+    {
+      "slug": "meter-readings",
+      "en": {
+        "source": "docs/ENERGY_AND_READINGS.md",
+        "label": "Readings & energy sensors",
+        "title": "Send DTEK meter readings and calibrate a home energy sensor",
+        "description": "Review and confirm cumulative electricity readings in Home Assistant. Link a kWh sensor, calibrate each tariff zone and set reading reminders."
+      },
+      "uk": {
+        "source": "docs/ENERGY_AND_READINGS.uk.md",
+        "label": "Покази й датчики енергії",
+        "title": "Як передати покази ДТЕК і налаштувати датчик енергії",
+        "description": "Передавайте покази лічильника ДТЕК після перевірки. Прив’яжіть накопичувальний датчик кВт·год, відкалібруйте тарифні зони та налаштуйте нагадування."
+      }
+    },
+    {
+      "slug": "outage-schedules",
+      "en": {
+        "source": "docs/SCHEDULES.md",
+        "label": "Outage schedules & groups",
+        "title": "DTEK outage schedules, building groups and missing data",
+        "description": "Understand DTEK building and apartment groups, schedule calendars, the all-group grid and PNG export. Distinguish missing schedules from a verified day without outages."
+      },
+      "uk": {
+        "source": "docs/SCHEDULES.uk.md",
+        "label": "Графіки й групи",
+        "title": "Графіки відключень ДТЕК: групи будинку й квартири",
+        "description": "Графіки ДТЕК у Home Assistant: усі групи будинку, група квартири, сітка й PNG. Що означають відсутній графік, кілька груп і зміна черги відключень."
+      }
+    },
+    {
+      "slug": "reference",
+      "en": {
+        "source": "docs/REFERENCE.md",
+        "label": "Entities & troubleshooting",
+        "title": "DTEK Monitor entities, automations and troubleshooting",
+        "description": "Home Assistant sensors, calendars and automation examples for DTEK. Diagnose unavailable data, understand freshness and find the right entity IDs."
+      },
+      "uk": {
+        "source": "docs/REFERENCE.uk.md",
+        "label": "Сутності й діагностика",
+        "title": "Датчики ДТЕК, автоматизації та діагностика в Home Assistant",
+        "description": "Довідник DTEK Monitor: сутності, календарі, приклади автоматизацій, свіжість даних, резервні копії та розв’язання проблем із підключенням."
+      }
+    }
+  ]
+}

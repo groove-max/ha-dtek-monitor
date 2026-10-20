@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block extrahead %}
+  {% if config.extra.google_site_verification %}
+    <meta name="google-site-verification" content="{{ config.extra.google_site_verification | e }}">
+  {% endif %}
+  {% if page %}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DTEK Monitor">
+    <meta property="og:title" content="{{ page.meta.title | e }}">
+    <meta property="og:description" content="{{ page.meta.description | e }}">
+    <meta property="og:url" content="{{ page.canonical_url }}">
+    <meta property="og:locale" content="{{ 'uk_UA' if config.theme.language == 'uk' else 'en_US' }}">
+    <meta property="og:locale:alternate" content="{{ 'en_US' if config.theme.language == 'uk' else 'uk_UA' }}">
+    <meta property="og:image" content="{{ config.extra.project_url }}assets/social-preview.png">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="640">
+    <meta property="og:image:alt" content="DTEK Monitor for Home Assistant — schedules, personal accounts and meter readings">
+    <meta name="twitter:card" content="summary_large_image">
+  {% endif %}
+{% endblock %}
+{% block content %}
+  {% if page.meta.alternates %}
+    <nav class="language-switch" aria-label="{{ 'Мова сторінки' if config.theme.language == 'uk' else 'Page language' }}">
+      {% for language, url in page.meta.alternates.items() %}
+        <a href="{{ url }}" hreflang="{{ language }}" lang="{{ language }}" {% if language == config.theme.language %}aria-current="page"{% endif %}>{{ 'Українська' if language == 'uk' else 'English' }}</a>
+      {% endfor %}
+    </nav>
+  {% endif %}
+  {{ super() }}
+{% endblock %}

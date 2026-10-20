@@ -2,21 +2,20 @@
 
 **English** · [Українська](README.uk.md)
 
-> **2.0.0-rc2 — regular GitHub release.** Available through HACS without enabling prereleases. Kyiv oblast and Dnipropetrovsk oblast cabinets remain experimental.
-> [Install, upgrade or roll back](docs/UPGRADING.md).
+**DTEK outage schedules, your personal account and meter readings — together in Home Assistant.** Follow your building’s outage groups, view electricity consumption and review readings before sending them to DTEK.
+
+Supports **Odesa oblast, Kyiv city, Kyiv oblast and Dnipropetrovsk oblast** in Ukraine. Address schedules work without a cabinet login; personal-account features are optional.
+
+**[Install](docs/UPGRADING.md)** · [Documentation](https://groove-max.github.io/ha-dtek-monitor/en/) · [Latest release](https://github.com/groove-max/ha-dtek-monitor/releases/latest) · [Telegram companion](https://github.com/groove-max/ha-dtek-telegram-bot)
+
+![My DTEK dashboard in Home Assistant: a fictional account, cumulative meter reading, monthly consumption and outage group](docs/images/my-dtek-overview.en.png)
 
 [![HACS custom integration](https://img.shields.io/badge/HACS-custom_integration-41BDF5)](https://hacs.dev/docs/faq/custom_repositories/)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
 
-Bring DTEK electricity outage schedules, address status and schedule groups into Home Assistant. Supports **Odesa oblast, Kyiv oblast, Dnipropetrovsk oblast and Kyiv city** in Ukraine.
+Requires **Home Assistant 2026.3.0 or newer**. Available through HACS Custom repositories in the regular release channel. Cabinet features for **Kyiv oblast and Dnipropetrovsk oblast are experimental**; see [regional support](#regions).
 
-Choose your address once, then use sensors and calendars in dashboards and automations. No Telegram bot or physical electricity sensor is needed to use this integration.
-
-**Want Telegram notifications?** Pair it with [DTEK Telegram Bot](https://github.com/groove-max/ha-dtek-telegram-bot): the companion Home Assistant app sends schedule updates, upcoming-outage reminders and a pinned status message. It can also use your local voltage sensors to check actual power availability.
-
-**Personal Telegram use:** pair Monitor **2.0.0-rc2** with bot **0.5.0-rc2** for private cabinet notifications, reminders, reading history and confirmed submissions. [Personal bot setup](docs/PERSONAL_ACCOUNT.md#section-13).
-
-[Install](#installation) · [Set up](#setup) · [Understand the data](#data) · [Troubleshoot](#troubleshooting) · [Detailed reference](docs/REFERENCE.md)
+[Set up an address](#setup) · [Connect a personal account](#personal-account) · [Understand the data](#data) · [Troubleshoot](#troubleshooting)
 
 ## Choose what you need
 
@@ -67,7 +66,7 @@ Requires **Home Assistant 2026.3.0 or newer** and internet access from Home Assi
 
 1. Open **HACS → ⋮ → Custom repositories**.
 2. Add `https://github.com/groove-max/ha-dtek-monitor` with type **Integration**.
-3. Find **DTEK Monitor** and download **2.0.0-rc2**. No prerelease switch is needed. [Upgrade guide](docs/UPGRADING.md).
+3. Find **DTEK Monitor** and download the [latest release](https://github.com/groove-max/ha-dtek-monitor/releases/latest). No prerelease switch is needed. [Upgrade guide](docs/UPGRADING.md).
 4. Restart Home Assistant.
 5. Continue with [address setup](#setup) or [personal cabinet setup](#personal-account).
 
@@ -77,7 +76,7 @@ The noncommercial license does not meet the requirements for the default HACS ca
 
 ### Manually
 
-1. Download the source from the [release you want to install](https://github.com/groove-max/ha-dtek-monitor/releases).
+1. Download the source from the [latest release](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
 2. Copy the complete `custom_components/dtek_monitor` folder into your Home Assistant configuration directory, under `custom_components/`.
 3. Check that the resulting path is `custom_components/dtek_monitor/manifest.json`, without an extra nested folder.
 4. Restart Home Assistant and continue below.
@@ -120,8 +119,6 @@ An energy sensor is optional. It need not be ATORCH: use a cumulative grid-impor
 sensor for the correct apartment. Linking, official-meter calibration, corrections,
 scheduled checks and reminders are covered in the [readings guide](docs/ENERGY_AND_READINGS.md).
 **There is no automatic submission.** In HA, an administrator confirms each send; in the companion bot, only the assigned user with submission permission can confirm it.
-
-![My DTEK dashboard with a fictional account](docs/images/my-dtek-overview.en.png)
 
 [Complete cabinet setup and features](docs/PERSONAL_ACCOUNT.md).
 

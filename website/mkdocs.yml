@@ -1,0 +1,56 @@
+site_name: DTEK Monitor
+site_url: https://groove-max.github.io/ha-dtek-monitor/
+repo_url: https://github.com/groove-max/ha-dtek-monitor
+repo_name: GitHub
+edit_uri: ""
+copyright: >-
+  DTEK Monitor ·
+  <a href="https://github.com/groove-max/ha-dtek-monitor/blob/main/LICENSE">PolyForm Noncommercial 1.0.0</a>
+  · <a href="https://groove-max.github.io/ha-dtek-monitor/assets/MATERIAL-LICENSE.txt">Theme: MIT</a>
+theme:
+  name: material
+  custom_dir: overrides
+  font: false
+  logo: assets/icon.png
+  favicon: assets/icon.png
+  features:
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Dark mode / Темна тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Light mode / Світла тема
+plugins:
+  - search
+markdown_extensions:
+  - tables
+  - fenced_code
+  - attr_list
+  - toc:
+      permalink: true
+extra_css:
+  - assets/site.css
+extra:
+  generator: false
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+  links:
+    not_found: warn
+    unrecognized_links: warn
+    anchors: warn

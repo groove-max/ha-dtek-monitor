@@ -1,10 +1,10 @@
-# Install or upgrade to DTEK Monitor 2.0.0-rc2
+# Install, update or roll back DTEK Monitor
 
 **English** · [Українська](UPGRADING.uk.md) · [README](../README.md)
 
-**2.0.0-rc2 is published as a regular GitHub release**, without the Pre-release flag. HACS offers it in its normal release channel; the version name retains RC2.
+Install the **[latest regular release](https://github.com/groove-max/ha-dtek-monitor/releases/latest)**. HACS offers it in the normal release channel, without enabling prereleases. Check its release notes for version-specific changes.
 
-This release adds My DTEK, cabinets for four operators, history, readings and suggestions from cumulative energy sensors. Kyiv oblast and Dnipropetrovsk oblast cabinets, including apartment-group lookup, remain experimental and await real-account validation. Building schedules work independently, without a cabinet login.
+Version 2 adds My DTEK, cabinets for four operators, history, readings and suggestions from cumulative energy sensors. Kyiv oblast and Dnipropetrovsk oblast cabinets, including apartment-group lookup, remain experimental and await real-account validation. Building schedules work independently, without a cabinet login.
 
 ## Before updating
 
@@ -19,18 +19,18 @@ Existing addresses, polling options and entity IDs should be preserved. Do not
 remove and re-add the integration to upgrade. Existing development versions
 `1.8.0b*` also update in place. The integration update does not change bot destinations or power-sensor bindings.
 Existing building notifications remain compatible. To use personal Telegram
-profiles, install **DTEK Telegram Bot 0.5.0-rc2** after updating the integration.
+profiles, install **DTEK Telegram Bot 0.5.0-rc2 or newer** after updating the integration.
 
 ## Install with HACS
 
 1. Add `https://github.com/groove-max/ha-dtek-monitor` as an **Integration** under **HACS → ⋮ → Custom repositories**, if it is not already there.
-2. Open **DTEK Monitor** and download or update to **2.0.0-rc2**. You do not need to enable **Pre-release**.
-3. If an older release is shown, refresh the repository information in HACS. If you previously selected a specific version, use **Redownload** and select **2.0.0-rc2**.
+2. Open **DTEK Monitor** and download or update to the latest release. You do not need to enable **Pre-release**.
+3. If an older release is shown, refresh the repository information in HACS. If you previously selected a specific version, use **Redownload** and select the latest available release.
 4. Restart Home Assistant and reload the browser or HA app page to load the new cards.
 
 ## Install manually
 
-Download **dtek_monitor.zip** from [release 2.0.0-rc2](https://github.com/groove-max/ha-dtek-monitor/releases/tag/v2.0.0-rc2).
+Download **dtek_monitor.zip** from [the latest release](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
 Extract its contents into `custom_components/dtek_monitor` inside the HA
 configuration directory. The resulting file must be
 `custom_components/dtek_monitor/manifest.json`. Replace the previous component

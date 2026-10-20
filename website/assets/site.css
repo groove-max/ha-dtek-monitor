@@ -1,0 +1,31 @@
+:root {
+  --md-primary-fg-color: #086c9b;
+  --md-primary-fg-color--light: #1686af;
+  --md-primary-fg-color--dark: #084b70;
+  --md-text-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --md-code-font: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+[data-md-color-scheme="slate"] { --md-default-bg-color: #11212b; }
+.md-header { box-shadow: none; border-bottom: 3px solid #f4cd38; }
+.md-header__button.md-logo img { height: 1.8rem; width: 1.8rem; }
+.md-grid { max-width: 72rem; }
+.md-typeset { font-size: .85rem; line-height: 1.75; }
+.md-typeset h1 { font-size: 2.05rem; line-height: 1.2; font-weight: 760; letter-spacing: -.035em; color: var(--md-default-fg-color); }
+.md-typeset h2 { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; }
+.md-typeset img[src*="my-dtek"] { border: 1px solid var(--md-default-fg-color--lightest); border-radius: 16px; box-shadow: 0 12px 30px #082e4612; }
+.md-typeset table:not([class]) { font-size: .76rem; line-height: 1.6; }
+.md-typeset table:not([class]) th { background: #086c9b10; }
+.md-typeset blockquote { border-left: 3px solid #e3b521; background: #e3b5210c; padding: .65rem 1rem; border-radius: 0 8px 8px 0; }
+.md-typeset a { text-underline-offset: .2em; }
+.md-typeset a:focus-visible { outline: 2px solid #0785b7; outline-offset: 4px; }
+.md-typeset pre { border-radius: 10px; }
+.language-switch { display:flex; gap:6px; margin:0 0 24px; font-size:.7rem; }
+.language-switch a { border:1px solid var(--md-default-fg-color--lightest); border-radius:6px; padding:4px 12px; }
+.language-switch a[aria-current="page"] { background:var(--md-primary-fg-color); color:#fff; border-color:transparent; }
+.md-typeset .headerlink { opacity: 0; }
+.md-typeset :is(h2,h3):focus-within .headerlink,
+.md-typeset :is(h2,h3):hover .headerlink { opacity: 1; }
+@media (max-width: 600px) {
+  .md-typeset h1 { font-size: 1.6rem; }
+  .md-typeset { font-size: .82rem; }
+}
