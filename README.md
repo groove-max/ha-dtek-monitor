@@ -76,8 +76,8 @@ The noncommercial license does not meet the requirements for the default HACS ca
 
 ### Manually
 
-1. Download the source from the [latest release](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
-2. Copy the complete `custom_components/dtek_monitor` folder into your Home Assistant configuration directory, under `custom_components/`.
+1. Download **dtek_monitor.zip** from the [latest release](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
+2. Extract the archive into `custom_components/dtek_monitor` inside your Home Assistant configuration directory.
 3. Check that the resulting path is `custom_components/dtek_monitor/manifest.json`, without an extra nested folder.
 4. Restart Home Assistant and continue below.
 

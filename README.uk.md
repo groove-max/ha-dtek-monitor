@@ -76,8 +76,8 @@
 
 ### Вручну
 
-1. Завантажте вихідний код [останнього випуску](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
-2. Скопіюйте всю папку `custom_components/dtek_monitor` у каталог конфігурації Home Assistant, до `custom_components/`.
+1. Завантажте **dtek_monitor.zip** з [останнього випуску](https://github.com/groove-max/ha-dtek-monitor/releases/latest).
+2. Розпакуйте архів у `custom_components/dtek_monitor` усередині каталогу конфігурації Home Assistant.
 3. Переконайтеся, що отримали шлях `custom_components/dtek_monitor/manifest.json`, без зайвої вкладеної папки.
 4. Перезапустіть Home Assistant і виконайте налаштування нижче.
 
