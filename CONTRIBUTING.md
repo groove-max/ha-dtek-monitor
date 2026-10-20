@@ -82,6 +82,5 @@ When changing Ukrainian translations, run `python scripts/sync_translations.py`.
 User guides are published in [Ukrainian and English](https://groove-max.github.io/ha-dtek-monitor/).
 Edit the existing Markdown guides, then run `python scripts/build_docs.py` and
 `python scripts/check_docs.py` after installing `website/requirements.txt`.
-See [website maintenance](website/README.md) for the build, preview, publishing,
-sharing image and Search Console verification. The site publishes automatically
-from `main`; generated HTML is not committed or included in integration archives.
+The site publishes automatically from `main`; generated HTML is not committed
+or included in integration archives.

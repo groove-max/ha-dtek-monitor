@@ -82,6 +82,5 @@ python -m unittest discover -s tests -p 'test_*card.py' -v
 Посібники опубліковано [українською та англійською](https://groove-max.github.io/ha-dtek-monitor/).
 Редагуйте наявні Markdown-файли, встановіть `website/requirements.txt` і запустіть
 `python scripts/build_docs.py` та `python scripts/check_docs.py`.
-[Інструкція підтримки сайту](website/README.md) описує збірку, попередній перегляд,
-публікацію, зображення для посилань і перевірку Search Console. Сайт автоматично
-оновлюється з `main`; згенерований HTML не додається в Git або архів інтеграції.
+Сайт автоматично оновлюється з `main`; згенерований HTML не додається в Git
+або архів інтеграції.
