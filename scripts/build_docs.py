@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from html import escape
 import json
 import logging
 import os
@@ -118,10 +119,27 @@ def main():
 
     # The root opens Ukrainian by default. English remains a normal crawlable
     # link, not a browser-language redirect. Each translated page is canonical.
+    # Link-preview crawlers may read this page without following its refresh.
+    homepage = next(page["uk"] for page in SPEC["pages"] if not page["slug"])
+    title = escape(homepage["title"], quote=True)
+    description = escape(homepage["description"], quote=True)
     (OUTPUT / "index.html").write_text(
         '<!doctype html><html lang="uk"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>DTEK Monitor — Home Assistant</title>'
+        f'<title>{title}</title>'
+        f'<meta name="description" content="{description}">'
+        '<meta property="og:type" content="website">'
+        '<meta property="og:site_name" content="DTEK Monitor">'
+        f'<meta property="og:title" content="{title}">'
+        f'<meta property="og:description" content="{description}">'
+        f'<meta property="og:url" content="{URL}uk/">'
+        '<meta property="og:locale" content="uk_UA">'
+        '<meta property="og:locale:alternate" content="en_US">'
+        f'<meta property="og:image" content="{URL}assets/social-preview.png">'
+        '<meta property="og:image:width" content="1280">'
+        '<meta property="og:image:height" content="640">'
+        '<meta property="og:image:alt" content="DTEK Monitor for Home Assistant — schedules, personal accounts and meter readings">'
+        '<meta name="twitter:card" content="summary_large_image">'
         + (f'<meta name="google-site-verification" content="{verification}">' if verification else "")
         +
         f'<link rel="canonical" href="{URL}uk/">'

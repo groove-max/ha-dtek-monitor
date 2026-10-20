@@ -91,10 +91,23 @@ def main():
                     check(document(file).find(id=fragment) is not None, f"Broken anchor on {url}: {value}")
 
     sitemap = ET.parse(OUTPUT / "sitemap.xml")
-    verification = document(OUTPUT / "index.html").select_one('meta[name="google-site-verification"]')
+    root = document(OUTPUT / "index.html")
+    verification = root.select_one('meta[name="google-site-verification"]')
     token = os.environ.get("GOOGLE_SITE_VERIFICATION")
     check(verification and verification.get("content") == token if token else verification is None,
           "Incorrect root Search Console verification")
+    homepage = next(page["uk"] for page in SPEC["pages"] if not page["slug"])
+    for selector, value in {
+        'meta[name="description"]': homepage["description"],
+        'meta[property="og:title"]': homepage["title"],
+        'meta[property="og:description"]': homepage["description"],
+        'meta[property="og:image"]': BASE + "assets/social-preview.png",
+        'meta[property="og:url"]': BASE + "uk/",
+        'meta[name="twitter:card"]': "summary_large_image",
+        'meta[http-equiv="refresh"]': "0;url=uk/",
+    }.items():
+        tag = root.select_one(selector)
+        check(tag and tag.get("content") == value, f"Incorrect root metadata: {selector}")
     actual = {item.text for item in sitemap.findall(".//{*}loc")}
     check(actual == expected, "Sitemap must contain exactly the canonical content pages")
     for item in sitemap.findall("./{*}url"):
