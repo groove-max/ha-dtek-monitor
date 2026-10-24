@@ -156,3 +156,51 @@ class GridRefreshAPITests(unittest.IsolatedAsyncioTestCase):
             await self.invoke()
         self.connection.send_result.assert_not_called()
         self.assertEqual(self.connection.send_error.call_args.args[1], "not_available")
+
+
+@unittest.skipUnless(runtime.HAS_HA, "Requires Home Assistant")
+class BuildingChoicesTests(unittest.TestCase):
+    def setUp(self):
+        GridAPITests.setUp(self)
+        self.hass.config_entries.async_entries = Mock(return_value=[self.entry])
+        for key, entity_id in (("power", "binary_sensor.renamed"), ("last_update", "sensor.renamed_timestamp")):
+            self.entities.append(SimpleNamespace(
+                unique_id="building_" + key, entity_id=entity_id,
+                platform="dtek_monitor", disabled_by=None,
+            ))
+
+    def choices(self):
+        self.connection.reset_mock()
+        with (
+            patch.object(api.er, "async_get", return_value=SimpleNamespace(async_get=Mock(return_value=self.entity))),
+            patch.object(api.er, "async_entries_for_config_entry", return_value=self.entities),
+        ):
+            api.websocket_buildings(self.hass, self.connection, {"id": 5})
+        return self.connection.send_result.call_args.args[1]
+
+    def test_resolves_renamed_entities_and_uses_no_network_calls(self):
+        result = self.choices()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["status_entity"], "sensor.status")
+        self.assertEqual(result[0]["entity"], "binary_sensor.renamed")
+        self.assertEqual(result[0]["updated_entity"], "sensor.renamed_timestamp")
+        self.assertIn(self.entry.runtime_data.address.house, result[0]["address"])
+        self.assertTrue(result[0]["groups"])
+
+    def test_permissions_and_disabled_calendars_filter_choices(self):
+        self.connection.user.permissions.check_entity.side_effect = lambda entity, policy: entity != "calendar.possible"
+        self.assertEqual(self.choices(), [])
+        self.connection.user.permissions.check_entity.side_effect = lambda entity, policy: entity != "binary_sensor.renamed"
+        self.assertNotIn("entity", self.choices()[0])
+        self.entities[1].disabled_by = "user"
+        self.assertEqual(self.choices(), [])
+
+    def test_accounts_unloaded_and_unavailable_address_groups(self):
+        self.entry.data = {"entry_kind": "account"}
+        self.assertEqual(self.choices(), [])
+        self.entry.data = {}
+        self.entry.state = ConfigEntryState.SETUP_RETRY
+        self.assertEqual(self.choices(), [])
+        self.entry.state = ConfigEntryState.LOADED
+        self.entry.runtime_data.address_success = False
+        self.assertEqual(self.choices()[0]["groups"], [])

@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Integrate FastivProService's compact daily timeline from PR #12 as a built-in dashboard card. Add automatic loading, a permission-aware building picker, English/Ukrainian UI, shared grid validation/time helpers and browser regressions. Keep demos/YAML in examples; no manual JS resource installation is required.
+
 ## [2.0.0-rc4] - 2026-10-23
 
 **Regular GitHub release**, without the Pre-release flag. Available through the standard HACS update channel. Requires HA 2026.3.0+.

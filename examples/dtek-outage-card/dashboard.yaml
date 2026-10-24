@@ -1,0 +1,7 @@
+type: custom:dtek-outage-card
+title: Мій дім
+entity: binary_sensor.YOUR_PREFIX_power
+status_entity: sensor.YOUR_PREFIX_schedule_status
+updated_entity: sensor.YOUR_PREFIX_dtek_last_update
+grid_options:
+  columns: full

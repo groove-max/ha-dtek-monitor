@@ -29,6 +29,9 @@ class LoaderTests(unittest.IsolatedAsyncioTestCase):
                 await page.wait_for_function(
                     "!!customElements.get('dtek-account-workspace-card')"
                 )
+                await page.wait_for_function("!!customElements.get('dtek-outage-card')")
+                self.assertTrue(await page.evaluate("!!customElements.get('dtek-outage-card-editor')"))
+                self.assertEqual(await page.evaluate("customCards.filter(c=>c.type==='dtek-outage-card').length"), 1)
                 self.assertEqual(
                     await page.evaluate(
                         "customElements.get('dtek-energy-editor').workspaceVersion"

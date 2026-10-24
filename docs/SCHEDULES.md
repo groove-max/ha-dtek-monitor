@@ -5,6 +5,7 @@
 A schedule is the operator's plan, not a measurement of electricity at home.
 
 - [Schedule grid](#section-1)
+- [Compact dashboard card](#compact-card)
 - [My apartment group and the building schedules](#section-2)
 - [Address repair works](#address-works)
 - [Upcoming times and tomorrow's schedule](#upcoming-times)
@@ -45,6 +46,13 @@ unknown. Day/filter selections survive ordinary HA updates.
 A standalone `custom:dtek-schedule-card` also opens the grid by default; set
 `view: list` to retain its previous default. Its `status_entity` and the planned
 and possible calendar entities must be enabled and readable by the HA user.
+
+<a id="compact-card"></a>
+## Compact dashboard card
+
+For a small daily timeline alongside your other home controls, choose **Edit dashboard → Add card → DTEK · Компактний графік / Compact schedule**. Select a building in the visual editor; the integration fills in its entities and loads the card automatically. No extra HACS repository or manual resource is needed.
+
+The card shows DTEK's current address status and today's/tomorrow's schedule for the selected group. The group's display selection does not change cabinet settings or bot alerts. Buildings connected automatically from a cabinet also appear in the editor. [Setup, optional YAML and troubleshooting](../examples/dtek-outage-card/README.md).
 
 <a id="section-2"></a>
 ## My apartment group and the building schedules

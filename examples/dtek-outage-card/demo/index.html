@@ -1,0 +1,10 @@
+<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Компактні відключення</title><style>:root{color-scheme:dark;--primary-text-color:#e9f0f7;--secondary-text-color:#98a6b6;--card-background-color:#18212b;--divider-color:#303b48}body{background:#0d1219;font:14px system-ui;margin:0;padding:24px}main{max-width:520px;margin:auto}p{color:#98a6b6;font-size:12px}</style><main><p>Демонстраційні дані · компактна картка</p><dtek-outage-card></dtek-outage-card></main><script type="module">
+import "../../../custom_components/dtek_monitor/frontend/outage-card.js";
+const prefix='demo';
+const card=document.querySelector('dtek-outage-card');
+card.setConfig({entity:'binary_sensor.'+prefix+'_power',status_entity:'sensor.'+prefix+'_schedule_status',updated_entity:'sensor.'+prefix+'_dtek_last_update',title:'Мій дім'});
+const makeDay=(date,tomorrow=false)=>({date,slots:Array.from({length:48},(_,i)=>({label:String(Math.floor(i/2)).padStart(2,'0')+':'+(i%2?'30':'00'),offset:'+0300'})),rows:[{id:'GPV1.1',label:'Черга 1.1',home:false,cells:Array(48).fill('clear')},{id:'GPV2.2',label:'Черга 2.2',home:true,cells:Array.from({length:48},(_,i)=>tomorrow?'unknown':((i>=15&&i<23)||(i>=26&&i<29)||(i>=36&&i<44))?'outage':'clear')}]});
+window.demoData={status:'ready',days:[makeDay('2026-10-23'),makeDay('2026-10-24',true)]};
+window.demoHass={language:'uk',states:{['binary_sensor.'+prefix+'_power']:{state:'on',attributes:{}},['sensor.'+prefix+'_schedule_status']:{state:'current',attributes:{}},['sensor.'+prefix+'_dtek_last_update']:{state:'2026-10-23T22:06:00+03:00'}},callWS:async()=>window.demoData};
+card.hass=window.demoHass;
+</script></html>

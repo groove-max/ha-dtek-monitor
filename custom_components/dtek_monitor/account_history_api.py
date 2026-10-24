@@ -53,7 +53,7 @@ async def async_setup_history(hass):
     from .account_submission_api import async_setup_submissions
     from .account_energy_api import async_setup_energy
 
-    from .schedule_grid_api import websocket_grid, websocket_refresh
+    from .schedule_grid_api import websocket_buildings, websocket_grid, websocket_refresh
     from .account_options_api import websocket_options
     from .bot_api import websocket_bot_account
 
@@ -63,6 +63,7 @@ async def async_setup_history(hass):
     websocket_api.async_register_command(hass, websocket_options)
     websocket_api.async_register_command(hass, websocket_grid)
     websocket_api.async_register_command(hass, websocket_refresh)
+    websocket_api.async_register_command(hass, websocket_buildings)
     await async_setup_submissions(hass)
     await async_setup_energy(hass)
     websocket_api.async_register_command(hass, websocket_history)
@@ -134,6 +135,14 @@ async def async_setup_history(hass):
                     str(Path(__file__).parent / "frontend" / "schedule-grid.js"),
                     False,
                 ),
+                *[
+                    StaticPathConfig(
+                        f"/dtek_monitor/{name}.js",
+                        str(Path(__file__).parent / "frontend" / f"{name}.js"),
+                        False,
+                    )
+                    for name in ("outage-card", "outage-card-editor", "outage-card-text", "schedule-grid-data")
+                ],
                 StaticPathConfig(
                     "/dtek_monitor/schedule-card.js",
                     str(Path(__file__).parent / "frontend" / "schedule-card.js"),

@@ -19,6 +19,46 @@ from .schedule_changes import changed_groups, schedule_record
 from .schedule_status import schedule_status
 
 
+@websocket_api.websocket_command({vol.Required("type"): "dtek_monitor/buildings"})
+@callback
+def websocket_buildings(hass, connection, msg):
+    """Local address choices, including cabinet-linked public buildings.
+
+    Use registry identities, not entity names. Calendar permissions apply to
+    the catalog too; optional power/update entities require their own access.
+    """
+    registry = er.async_get(hass)
+    result = []
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        if entry.data.get(CONF_ENTRY_KIND) == ENTRY_ACCOUNT or entry.state != ConfigEntryState.LOADED:
+            continue
+        entities = {
+            e.unique_id: e for e in er.async_entries_for_config_entry(registry, entry.entry_id)
+            if e.platform == DOMAIN and e.disabled_by is None
+            and connection.user.permissions.check_entity(e.entity_id, POLICY_READ)
+        }
+        status = entities.get(build_entity_unique_id(entry, "schedule_status"))
+        if status is None:
+            continue
+        try:
+            coordinator, _, _ = resolve_grid(hass, connection, {"entity_id": status.entity_id})
+        except AccountAccessError:
+            continue
+        address = coordinator.address
+        item = {
+            "status_entity": status.entity_id,
+            "address": f"{address.city} · {address.street}, {address.house}",
+            "groups": list((coordinator.address_data or {}).get("schedule_groups", []))
+            if coordinator.address_success else [],
+        }
+        for key, role in (("power", "entity"), ("last_update", "updated_entity")):
+            entity = entities.get(build_entity_unique_id(entry, key))
+            if entity is not None:
+                item[role] = entity.entity_id
+        result.append(item)
+    connection.send_result(msg["id"], sorted(result, key=lambda item: item["address"]))
+
+
 def resolve_grid(hass, connection, msg):
     entity = er.async_get(hass).async_get(msg["entity_id"])
     entry = (

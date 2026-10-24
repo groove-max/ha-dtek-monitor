@@ -37,6 +37,7 @@ Requires **Home Assistant 2026.3.0 or newer**. Available through HACS Custom rep
 
 - The outage status, reason and estimated restoration time reported by DTEK for your address.
 - Separate calendars for planned outages and possible outage windows.
+- A built-in [compact daily schedule card](docs/SCHEDULES.md#compact-card), with visual building selection and automatic loading.
 - An [address repair calendar](docs/SCHEDULES.md#address-works), with a separate status for missing or unavailable repair times.
 - All schedule groups returned for the address, including addresses with multiple groups.
 - A clearly labeled **last known schedule** for viewing when DTEK is unavailable.
