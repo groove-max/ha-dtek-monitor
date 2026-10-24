@@ -123,7 +123,7 @@ when a fresh cabinet assignment or the building's sole verified group provides a
 unambiguous replacement. HA notifies you of the change; the obsolete manual choice
 is cleared so it cannot silently return later. Cabinet groups absent from the
 building do not authorize replacement. If several confirmed candidates remain, choose your group
-in Settings. If the public website hides group labels, the private schedule and bot can still use a cabinet-provided group after checking that it belongs to the building. Hidden groups without this confirmation, a removed building or failed verification leave the personal schedule unavailable; missing data never authorize a reassignment.
+in Settings. If the public website hides group labels, HA still displays the IDs returned by DTEK, including Kyiv groups. You can explicitly choose any currently verified building group for your personal HA calendar. Automatic selection still requires a matching cabinet assignment or the building’s sole group; it never guesses among several groups. The private Telegram bot uses only current cabinet assignments verified against the building, independently of manual HA choices. A removed building or failed verification leaves the relevant schedule unavailable; missing data never authorize a reassignment.
 Choosing **Do not link a building** removes only the personal link and prevents automatic relinking.
 
 <a id="changes"></a>

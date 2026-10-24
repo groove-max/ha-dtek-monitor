@@ -37,19 +37,15 @@ def compare_cabinet_groups(building_groups, cabinet):
     }
 
 
-def selectable_groups(coordinator, cabinet):
-    """Private labels may come from the cabinet even if public labels are hidden.
+def selectable_groups(coordinator):
+    """Offer current building IDs, independently of DTEK's label display policy.
 
-    Hidden identifiers are selectable only when the fresh cabinet assignment
-    matches the fresh building. Never expose unrelated hidden building groups.
+    An explicit choice does not change the cabinet assignment or the house's
+    calendars. Automatic selection still requires an unambiguous assignment.
     """
     if coordinator is None or not coordinator.address_success:
         return []
-    data = coordinator.address_data
-    building = data.get("schedule_groups", [])
-    if data.get("group_labels_visible"):
-        return list(building)
-    return compare_cabinet_groups(building, cabinet)["verified_cabinet_groups"]
+    return list(coordinator.address_data.get("schedule_groups", []))
 
 
 def automatic_selection(building_groups, cabinet):
@@ -93,19 +89,14 @@ def selection(hass, entry, number):
         if address.state == ConfigEntryState.LOADED:
             coordinator = getattr(address, "runtime_data", None)
         cabinet = cabinet_groups(entry, number)
-        choices = selectable_groups(coordinator, cabinet)
         data = coordinator.address_data if coordinator and coordinator.address_success else {}
         building_groups = data.get("schedule_groups", [])
         if coordinator is None or not coordinator.address_success:
             status = "address_unavailable"
-        elif not data.get("group_labels_visible") and not choices:
-            status = "labels_hidden"
         elif not groups:
             groups, status = automatic_selection(building_groups, cabinet)
         elif not set(groups).issubset(building_groups):
             status = "group_unavailable"
-        elif not set(groups).issubset(choices):
-            status = "labels_hidden"
         else:
             status = "selected"
     return address, coordinator, groups, status
@@ -200,8 +191,11 @@ class AccountScheduleEntity(Entity):
                 coordinator.address_data.get("schedule_groups", [])
                 if coordinator
                 and coordinator.address_success
-                and coordinator.address_data.get("group_labels_visible", False)
                 else []
+            ),
+            "group_labels_visible": (
+                coordinator.address_data.get("group_labels_visible", False)
+                if coordinator and coordinator.address_success else False
             ),
             "building": address.title if address else None,
         }

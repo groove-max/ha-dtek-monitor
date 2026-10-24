@@ -97,6 +97,22 @@ class ScheduleUpdateRuntimeTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("GPV5.1 → GPV3.1", self.create.call_args.args[1])
         self.assertEqual(self.events, [])
 
+    async def test_website_hidden_ids_are_used_for_group_and_schedule_change_notices(self):
+        self.client.get_home_status.return_value["showUserGroup"] = False
+        await self.refresh()
+        self.create.assert_not_called()
+        self.schedule["fact"]["data"][str(int(self.tomorrow.timestamp()))]["GPV5.1"]["14"] = "no"
+        await self.refresh()
+        self.assertEqual(self.events[0].data["changed_groups"], ["GPV5.1"])
+        self.assign(["GPV3.1"])
+        await self.refresh()
+        self.assertIn("GPV5.1 → GPV3.1", self.create.call_args.args[1])
+        self.assertEqual(self.groups[0].data["groups"], ["GPV3.1"])
+        self.assertFalse(self.coord.address_data["group_labels_visible"])
+        await self.refresh()
+        self.assertEqual(self.create.call_count, 1)
+        self.assertEqual(len(self.groups), 1)
+
     async def test_missing_day_and_recovery_never_cancel_verified_outages(self):
         self.schedule["fact"]["data"][str(int(self.tomorrow.timestamp()))]["GPV5.1"]["14"] = "no"
         await self.refresh()

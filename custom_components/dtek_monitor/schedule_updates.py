@@ -39,7 +39,7 @@ class ScheduleUpdates:
             self.loaded = True
         coordinator = self.coordinator
         data = coordinator.address_data or {}
-        if not coordinator.address_success or not data.get("group_labels_visible"):
+        if not coordinator.address_success:
             return
         groups = sorted(set(data.get("schedule_groups", [])))
         if not groups:

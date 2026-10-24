@@ -77,19 +77,36 @@ class GridTests(unittest.TestCase):
         self.assertEqual(set(cells), {"forecast", "forecast_clear"})
         self.assertEqual(cells[6:8], ["forecast", "forecast"])
 
-    def test_failures_and_hidden_publication_do_not_reuse_grid(self):
+    def test_failures_and_disabled_publication_do_not_reuse_grid(self):
         c, home, _, _ = overview_fixture()
         c.schedule_error = "offline"
         self.assertEqual(grid.grid_data(c, now=home.fetched_at)["days"], [])
         c.schedule_error = None
         for flags in [
             replace(c.overview.publication, schedule=False),
-            replace(c.overview.publication, group_labels=False),
+            replace(c.overview.publication, schedule=None),
         ]:
             c.overview = replace(c.overview, publication=flags)
             self.assertEqual(
                 grid.grid_data(c, now=home.fetched_at)["status"], "unpublished"
             )
+
+    def test_website_hidden_labels_use_source_ids_without_losing_coverage(self):
+        for visible in (False, None):
+            c, home, _, _ = overview_fixture()
+            c.overview = replace(
+                c.overview,
+                publication=replace(c.overview.publication, group_labels=visible),
+                groups=tuple(replace(group, label=None) for group in c.overview.groups),
+            )
+            result = grid.grid_data(c, ["GPV5.2"], now=home.fetched_at)
+            self.assertEqual(result["status"], "ready")
+            rows = {r["id"]: r for r in result["days"][0]["rows"]}
+            self.assertTrue(all(r["label"] == r["id"] for r in rows.values()))
+            self.assertTrue(rows["GPV5.2"]["home"] and rows["GPV5.2"]["selected"])
+            self.assertIn("outage", rows["GPV5.2"]["cells"])
+            self.assertEqual(set(rows["GPV4.1"]["cells"]), {"unknown"})
+            self.assertEqual(c.overview.publication.group_labels, visible)
 
     def test_bad_other_group_does_not_destroy_home_or_mark_empty(self):
         c, home, reading, raw = overview_fixture()

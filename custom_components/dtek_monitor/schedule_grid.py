@@ -21,10 +21,9 @@ def grid_data(coordinator, selected=(), now=None):
         return {**base, "status": "missing"}
     if schedule.state == "unsupported":
         return {**base, "status": "unsupported"}
-    if (
-        schedule.publication.schedule is not True
-        or schedule.publication.group_labels is not True
-    ):
+    # showUserGroup controls labels on DTEK's site, not schedule publication.
+    # When no public label is provided, rows below retain their source IDs.
+    if schedule.publication.schedule is not True:
         return {**base, "status": "unpublished"}
     home = coordinator.address_data.get("schedule_groups", [])
     groups = sorted(

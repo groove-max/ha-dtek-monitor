@@ -33,7 +33,7 @@ A recent HA state change is not enough to establish that a schedule is current. 
 | Attribute | Meaning |
 | --- | --- |
 | `schedule_groups` | Complete list of address groups; do not assume the scalar primary group is exhaustive. |
-| `group_labels_visible` | Whether group identifiers are suitable as public labels. |
+| `group_labels_visible` | Whether DTEK shows group labels on its public website (`showUserGroup`). Source metadata only: `false` does not hide returned IDs or block a published schedule in HA. |
 | `provider_id`, `address_id` | Source identity; prevents mixing different operators/addresses. |
 | `schedule_notifications_ready` | Whether the schedule passed the current address/group verification. |
 | `schedule_snapshot_id` | Identity of the verified schedule snapshot. |

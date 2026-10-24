@@ -88,7 +88,13 @@ def account_snapshot(hass, connection, entry, number):
     ).hexdigest()
     attrs = {
         "schedule_groups": groups,
+        # Older bots need this display flag for verified cabinet labels. Keep
+        # the website's actual flag separately for newer presentation contexts.
         "group_labels_visible": True,
+        "source_group_labels_visible": (
+            coordinator.address_data.get("group_labels_visible", False)
+            if coordinator and coordinator.address_success else False
+        ),
         "schedule_notifications_ready": ready,
         "schedule_snapshot_id": revision,
         "schedule_coverage": coordinator.snapshot_attributes["schedule_coverage"]

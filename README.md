@@ -179,11 +179,11 @@ Entity names follow your Home Assistant language. Open the integration's device 
 | **DTEK connection** | Connection and freshness diagnostics, including separate address/schedule errors. |
 | **Address repair works / Repair report availability** | Operator-reported repair intervals and their completeness. Separate from group schedules; advance notice is not guaranteed. |
 
-### Multiple groups and hidden group numbers
+### Multiple groups and Kyiv group identifiers
 
 When DTEK returns several groups, the integration keeps them all and preserves each calendar event's group. It cannot determine which entrance or apartment belongs to which group without additional information.
 
-Some operators, including Kyiv city, do not publish meaningful public group numbers. Internal identifiers may still appear in HA attributes. In building mode, the companion bot displays these as local **“Variant 1”, “Variant 2”** labels in its Ukrainian messages. These are not official queue numbers and can change when the address assignment changes.
+For Kyiv city and other operators, the integration displays the **group identifiers returned by DTEK**, such as `GPV29.1`, even when the public website hides group names. Calendars, the grid and group selection use these identifiers; the updated Telegram companion uses them too, instead of local “Variant 1 / Variant 2” labels. They identify the returned schedules and are not a guarantee of an officially published queue number or of the group serving your apartment. Keep all building groups, use a verified cabinet assignment or explicitly select your known group in My DTEK. DTEK may change the address assignment later.
 
 ### When a schedule is unavailable
 

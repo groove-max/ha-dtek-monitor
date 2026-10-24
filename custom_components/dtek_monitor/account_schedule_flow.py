@@ -10,7 +10,8 @@ from homeassistant.helpers.selector import (
 
 from .account import CONF_ACCOUNTS
 from .account_schedule import (
-    CONF_ACCOUNT_SCHEDULES, address_entries, cabinet_groups, selectable_groups,
+    CONF_ACCOUNT_SCHEDULES, address_entries, automatic_selection, cabinet_groups,
+    selectable_groups,
 )
 from .account_groups import USE_CABINET_GROUPS
 from .account_providers import ACCOUNT_PROVIDER_SPECS
@@ -90,9 +91,9 @@ async def schedule_address(flow, entry, user_input):
                 and address.state == ConfigEntryState.LOADED
                 and coordinator
                 and coordinator.address_success
-                and len(selectable_groups(
-                    coordinator, cabinet_groups(entry, flow._schedule_account)
-                )) == 1
+                and len(automatic_selection(
+                    selectable_groups(coordinator), cabinet_groups(entry, flow._schedule_account)
+                )[0]) == 1
             ):
                 return save(
                     flow,
@@ -137,9 +138,7 @@ async def schedule_groups(flow, entry, user_input):
         if address and address.state == ConfigEntryState.LOADED
         else None
     )
-    current = selectable_groups(
-        coordinator, cabinet_groups(entry, flow._schedule_account)
-    )
+    current = selectable_groups(coordinator)
     # The list shown in a form never changes under the user's cursor. Recheck
     # submitted selections against fresh applicability instead of replacing them.
     if flow._schedule_group_choices is None:

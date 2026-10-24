@@ -474,7 +474,7 @@
       "accounts_already_configured": "One of these accounts is already connected. Select only accounts that have not been added.",
       "invalid_schedule_address": "Select an existing address for this operator.",
       "invalid_schedule_groups": "Groups changed or the selection is invalid. Verify the address and reopen settings.",
-      "schedule_groups_unavailable": "Building groups are unverified or hidden by DTEK. You can save the address without selecting groups.",
+      "schedule_groups_unavailable": "Building groups are currently unverified. You can save the address without selecting groups.",
       "invalid_reminder_settings": "Check the reminder time and switches.",
       "invalid_check_settings": "Check the time and frequency.",
       "link_invalid_number": "Enter a modern household account number for the selected operator. Check the length and prefix shown in the form.",

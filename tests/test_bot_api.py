@@ -265,6 +265,8 @@ class BotSnapshotTests(unittest.TestCase):
         self.assertEqual(result["group_status"], "current")
         self.assertTrue(result["attributes"]["schedule_notifications_ready"])
         self.assertFalse(self.coordinator.address_data["group_labels_visible"])
+        self.assertTrue(result["attributes"]["group_labels_visible"])  # Older bots still show cabinet IDs.
+        self.assertFalse(result["attributes"]["source_group_labels_visible"])
         for status in ("expired", "unavailable", "pending", "empty", "disabled"):
             result = self.snapshot(("GPV57.1",), status)
             self.assertEqual(result["groups"], [])

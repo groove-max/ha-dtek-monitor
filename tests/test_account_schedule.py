@@ -120,6 +120,21 @@ class AccountScheduleTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.sensor.native_value, "GPV3.1")
         self.assertFalse(self.calendar.available)
 
+    async def test_verified_cabinet_group_still_links_automatically_when_website_hides_labels(self):
+        self.coord.address_data["group_labels_visible"] = False
+        cabinet = SimpleNamespace(status="current", groups=("GPV3.1",), checked_at=None)
+        self.personal.runtime_data = SimpleNamespace(groups=SimpleNamespace(get=lambda n: cabinet))
+        result = await self.choose_address()
+        link = result["data"][mod.CONF_ACCOUNT_SCHEDULES]["100001"]
+        self.assertEqual(link["groups"], [])
+        self.assertEqual(link["selection_source"], "automatic")
+        self.personal.options = result["data"]
+        self.assertEqual(self.sensor.native_value, "GPV3.1")
+        # Reopening the form exposes every current building ID for a manual choice.
+        result = await self.choose_address()
+        self.assertEqual(result["step_id"], "account_schedule_groups")
+        self.assertEqual(self.options._schedule_group_choices, ["GPV3.1", "GPV5.1"])
+
     async def test_selected_calendar_filters_while_public_keeps_every_group(self):
         self.link()
         events = await self.calendar.async_get_events(self.hass, self.start, self.end)
@@ -141,7 +156,7 @@ class AccountScheduleTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(other.available)
         self.assertNotIn("100001", str(self.calendar.extra_state_attributes))
 
-    async def test_hidden_public_labels_use_only_current_matching_cabinet_assignment(self):
+    async def test_website_hidden_labels_keep_cabinet_assignment_and_manual_choices_separate(self):
         self.link([])
         self.coord.address_data["group_labels_visible"] = False
         cabinet = SimpleNamespace(status="current", groups=("GPV3.1",), checked_at=None)
@@ -150,23 +165,26 @@ class AccountScheduleTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.sensor.native_value, "GPV3.1")
         self.assertEqual(self.sensor.extra_state_attributes["selection_status"], "cabinet_selected")
         self.assertEqual(self.sensor.extra_state_attributes["cabinet_groups"], ["GPV3.1"])
-        self.assertEqual(self.sensor.extra_state_attributes["building_groups"], [])
+        self.assertEqual(self.sensor.extra_state_attributes["building_groups"], ["GPV3.1", "GPV5.1"])
+        self.assertFalse(self.sensor.extra_state_attributes["group_labels_visible"])
         events = await self.calendar.async_get_events(self.hass, self.start, self.end)
         self.assertEqual(len(events), 1)
         self.assertIn("group=GPV3.1", events[0].description)
         for status in ("expired", "unavailable", "disabled", "empty", "pending"):
             cabinet.status = status
             self.assertFalse(self.calendar.available)
-            self.assertEqual(mod.selectable_groups(self.coord, cabinet), [])
+            self.assertEqual(mod.selectable_groups(self.coord), ["GPV3.1", "GPV5.1"])
         cabinet.status = "current"
         cabinet.groups = ("GPV3.1", "GPV9.1")
         self.assertTrue(self.calendar.available)
         self.assertEqual(self.sensor.native_value, "GPV3.1")
-        self.assertEqual(mod.selectable_groups(self.coord, cabinet), ["GPV3.1"])
+        self.assertEqual(mod.selectable_groups(self.coord), ["GPV3.1", "GPV5.1"])
         self.assertEqual(self.sensor.extra_state_attributes["unverified_cabinet_groups"], ["GPV9.1"])
         cabinet.groups = ("GPV3.1",)
         self.link(["GPV5.1"])
-        self.assertFalse(self.calendar.available)  # Hidden groups cannot be guessed.
+        self.assertTrue(self.calendar.available)  # Explicit, current building choice.
+        self.assertEqual(self.sensor.extra_state_attributes["selection_source"], "user")
+        self.assertEqual(self.sensor.extra_state_attributes["cabinet_groups"], ["GPV3.1"])
         self.assertEqual(self.coord.address_data, before)
 
     async def test_partial_cabinet_assignment_keeps_verified_calendar_only(self):
@@ -207,26 +225,44 @@ class AccountScheduleTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_hidden_multiple_cabinet_groups_allow_explicit_choice_and_recheck(self):
         self.coord.address_data["group_labels_visible"] = False
-        cabinet = SimpleNamespace(status="current", groups=("GPV3.1", "GPV5.1"))
+        cabinet = SimpleNamespace(status="current", groups=("GPV3.1", "GPV5.1"), checked_at=None)
         self.personal.runtime_data = SimpleNamespace(groups=SimpleNamespace(get=lambda n: cabinet))
         result = await self.choose_address()
         self.assertEqual(result["step_id"], "account_schedule_groups")
         self.assertEqual(self.options._schedule_group_choices, ["GPV3.1", "GPV5.1"])
         choices = list(self.options._schedule_group_choices)
         cabinet.status = "expired"
+        self.coord.address_success = False
         result = await self.options.async_step_account_schedule_groups({"schedule_groups": ["GPV3.1"]})
         self.assertEqual(result["errors"]["base"], "invalid_schedule_groups")
         self.assertEqual(self.options._schedule_group_choices, choices)
-        cabinet.status = "current"
+        self.coord.address_success = True
         result = await self.options.async_step_account_schedule_groups({"schedule_groups": ["GPV3.1"]})
         self.personal.options = result["data"]
         self.assertTrue(self.calendar.available)
+        self.assertEqual(self.sensor.extra_state_attributes["selection_source"], "user")
 
-    async def test_group_removed_or_hidden_and_failed_refresh_never_falls_back(self):
+    async def test_website_hidden_building_groups_without_cabinet_allow_choice_or_single_auto(self):
+        self.link([])
+        self.coord.address_data["group_labels_visible"] = False
+        self.assertEqual(self.sensor.extra_state_attributes["selection_status"], "not_selected")
+        self.assertFalse(self.calendar.available)
+        self.assertEqual(mod.selectable_groups(self.coord), ["GPV3.1", "GPV5.1"])
+        self.link(["GPV5.1"])
+        self.assertTrue(self.calendar.available)
+        self.assertEqual(self.sensor.native_value, "GPV5.1")
+        self.link([])
+        self.coord.address_data["schedule_groups"] = ["GPV3.1"]
+        self.assertEqual(self.sensor.extra_state_attributes["selection_status"], "auto_selected")
+        self.assertTrue(self.calendar.available)
+        self.coord.address_success = False
+        self.assertFalse(self.calendar.available)
+        self.assertEqual(mod.selectable_groups(self.coord), [])
+
+    async def test_group_removed_and_failed_refresh_never_falls_back(self):
         self.link()
         for change, reason in [
             ({"schedule_groups": ["GPV5.1"]}, "group_unavailable"),
-            ({"group_labels_visible": False}, "labels_hidden"),
         ]:
             before = dict(self.coord.address_data)
             self.coord.address_data.update(change)
