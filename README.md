@@ -19,7 +19,7 @@ Supports **Odesa oblast, Kyiv city, Kyiv oblast and Dnipropetrovsk oblast** in U
 
 Requires **Home Assistant 2026.3.0 or newer**. Available through HACS Custom repositories in the regular release channel. Cabinet features for **Kyiv oblast and Dnipropetrovsk oblast are experimental**; see [regional support](#regions).
 
-[Set up an address](#setup) · [Connect a personal account](#personal-account) · [Understand the data](#data) · [Troubleshoot](#troubleshooting)
+[Set up an address](#setup) · [Connect a personal account](#personal-account) · [Compare integrations](#comparison) · [Understand the data](#data) · [Troubleshoot](#troubleshooting)
 
 ## Choose what you need
 
@@ -31,6 +31,34 @@ Requires **Home Assistant 2026.3.0 or newer**. Available through HACS Custom rep
 | Telegram notifications | The separate [DTEK Telegram Bot](https://github.com/groove-max/ha-dtek-telegram-bot): building alerts in any chat, or your cabinet in a private conversation. |
 
 [Cabinet and dashboard](docs/PERSONAL_ACCOUNT.md) · [Readings and sensors](docs/ENERGY_AND_READINGS.md) · [Schedules and groups](docs/SCHEDULES.md)
+
+<a id="comparison"></a>
+## Already use another outage integration?
+
+If your current integration covers your schedule needs, you can keep that workflow. **DTEK Monitor also brings your personal DTEK cabinet into Home Assistant:** household accounts, reading and consumption history, meter submissions with photos, and reading suggestions from your own energy sensor. The optional [Telegram companion](https://github.com/groove-max/ha-dtek-telegram-bot) adds a private account menu or alerts for a building chat.
+
+Here is how the scope compares with [Svitlo Yeah / Світло Є](https://github.com/ALERTua/ha-svitlo-yeah). Checked **24 October 2026** against Svitlo Yeah **0.11.0**, DTEK Monitor **2.0.0-rc4** and DTEK Telegram Bot **0.5.0-rc4**. “Not built in” refers to the project itself; users can still create their own HA automations.
+
+| What you need | Svitlo Yeah | DTEK Monitor + optional Telegram Bot |
+| --- | --- | --- |
+| Schedules, calendars and upcoming outage times | Available | Available |
+| Regional coverage | More regions and distribution operators | Four DTEK operators: Odesa oblast, Kyiv city, Kyiv oblast and Dnipropetrovsk oblast |
+| Address lookup and group changes | Through Yasno for Kyiv and Dnipro | Through regional DTEK services; separate building groups and an apartment group |
+| Personal cabinet and multiple household accounts | Not built in | Available in the integration |
+| Reading history and monthly consumption | Not built in | Available in the integration |
+| Meter submissions, including photos | Not built in | Available in HA and the private bot, after confirmation |
+| Reading suggestions from a cumulative HA energy sensor | Not built in | Available, with calibration to the official meter |
+| Ready-to-use private and building Telegram bot | Not included; custom HA automations are possible | Separate companion app, with configurable recipients and notifications |
+
+The comparison follows [Svitlo Yeah's documented features](https://github.com/ALERTua/ha-svitlo-yeah/blob/80c478b16dd731575fd29de13d0d5fcb9a11a0ce/README.md), our [cabinet guide](docs/PERSONAL_ACCOUNT.md), [readings guide](docs/ENERGY_AND_READINGS.md) and [bot features](https://github.com/groove-max/ha-dtek-telegram-bot#features). Cabinet support for **Kyiv oblast and Dnipropetrovsk oblast is experimental**. Actual power and voltage alerts in the bot require suitable HA sensors; meter submissions always require confirmation.
+
+### Data directly from DTEK
+
+**DTEK Monitor receives data directly from DTEK, using the same APIs and schedule data as DTEK's website.** It queries the selected operator's regional site, without an intermediate GitHub repository publishing schedule copies. See the [DTEK client](custom_components/dtek_monitor/dtek_client.py) and [supported operator endpoints](custom_components/dtek_monitor/providers.py).
+
+Svitlo Yeah uses the **Yasno API** for Kyiv and Dnipro. Its **DTEK JSON** sources for Odesa, Kyiv oblast, and Dnipro and oblast are files in the third-party `Baskerville42/outage-data-ua` repository. These routes are defined in its [data-source configuration](https://github.com/ALERTua/ha-svitlo-yeah/blob/80c478b16dd731575fd29de13d0d5fcb9a11a0ce/custom_components/svitlo_yeah/const.py).
+
+Direct access removes dependence on a third party updating a schedule copy. Availability and freshness still depend on DTEK's services and publications; direct access alone does not guarantee faster updates or uninterrupted service.
 
 <a id="features"></a>
 ## What you get
