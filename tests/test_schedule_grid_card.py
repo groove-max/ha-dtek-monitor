@@ -35,9 +35,10 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
         await self.p.stop()
         self.assertEqual(self.errors, [])
 
-    async def test_all_groups_default_with_home_and_personal_highlights(self):
-        self.assertEqual(await self.page.locator("tbody tr").count(), 12)
-        self.assertEqual(await self.page.locator("tbody tr.home").count(), 2)
+    async def test_personal_default_with_home_and_all_groups_available(self):
+        self.assertEqual(await self.page.locator("tbody tr").count(), 1)
+        self.assertEqual(await self.page.get_by_label("Groups", exact=True).input_value(), "mine")
+        self.assertEqual(await self.page.locator("tbody tr.home").count(), 1)
         self.assertEqual(await self.page.locator("tbody tr.selected").count(), 1)
         self.assertEqual(
             await self.page.locator("tbody tr.selected").get_attribute("data-group"),
@@ -73,7 +74,50 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(await self.page.evaluate("calls.length"), 1)
 
+    async def test_sixty_groups_search_jump_and_refresh_preserve_user_choices(self):
+        await self.page.evaluate("""() => {
+          for(const day of data.days) day.rows=Array.from({length:60},(_,i)=>({...day.rows[0],id:`GPV${Math.floor(i/2)+1}.${i%2+1}`,label:`GPV${Math.floor(i/2)+1}.${i%2+1}`,home:i>=56&&i<=57,selected:i===56}));
+          card.shadowRoot.querySelector('dtek-schedule-grid').load();
+        }""")
+        await self.page.get_by_role("button", name="GPV29.1: Intervals", exact=True).wait_for()
+        self.assertEqual(await self.page.locator("tbody tr").count(), 1)
+        await self.page.get_by_label("Groups", exact=True).select_option("all")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 60)
+        search = self.page.get_by_label("Find a group", exact=True)
+        await search.fill("29.")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 2)
+        await self.page.evaluate("card.shadowRoot.querySelector('dtek-schedule-grid').load()")
+        self.assertEqual(await search.input_value(), "29.")
+        await search.fill("absent")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 0)
+        await self.page.get_by_text("No groups match this search.", exact=True).wait_for()
+        await self.page.get_by_role("button", name="Go to my group", exact=True).click()
+        self.assertEqual(await search.input_value(), "")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 60)
+        self.assertGreater(await self.page.locator(".scroll").evaluate("e=>e.scrollTop"), 1000)
+        self.assertIn("GPV29.1", await self.page.locator(".details").inner_text())
+
+    async def test_unknown_assignment_is_explicit_and_never_selects_first_group(self):
+        await self.page.evaluate("""() => {
+          for(const day of data.days)for(const row of day.rows){row.selected=false;row.home=false;}
+          hass.states['sensor.unassigned']=hass.states['sensor.status'];card.setConfig({...card._config,status_entity:'sensor.unassigned'});card.hass={...hass};
+        }""")
+        await self.page.get_by_text("Your group is not confirmed. You can view building groups or all groups.", exact=True).wait_for()
+        self.assertEqual(await self.page.locator("tbody tr").count(), 12)
+        self.assertEqual(await self.page.locator(".details").inner_text(), "")
+        await self.page.get_by_label("Groups", exact=True).select_option("mine")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 0)
+        self.assertTrue(await self.page.get_by_role("button", name="Save PNG").is_disabled())
+        await self.page.get_by_label("Groups", exact=True).select_option("home")
+        await self.page.evaluate("""() => {
+          data.days.forEach(d=>d.rows[4].home=true);card.shadowRoot.querySelector('dtek-schedule-grid').load();
+        }""")
+        await self.page.locator("tbody tr").wait_for()
+        self.assertEqual(await self.page.get_by_label("Groups", exact=True).input_value(), "home")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 1)
+
     async def test_half_hours_unknown_and_forecast_are_distinct(self):
+        await self.page.get_by_label("Groups", exact=True).select_option("all")
         await self.page.get_by_role(
             "button", name="GPV3.1: Intervals", exact=True
         ).click()
@@ -176,6 +220,7 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await self.page.locator(".feedback.error").count(), int(status == "error"))
 
     async def test_partial_grid_keeps_unknown_cells_visible(self):
+        await self.page.get_by_label("Groups", exact=True).select_option("all")
         self.assertIn("Only part", await self.page.locator(".feedback").inner_text())
         self.assertEqual(await self.page.locator("td.unknown").count(), 48)
         await self.page.get_by_label("Groups", exact=True).select_option("home")

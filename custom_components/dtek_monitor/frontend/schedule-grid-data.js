@@ -5,7 +5,7 @@ export function validateGrid(data) {
   if (!data || !Array.isArray(data.days) || data.days.length > 7 || data.days.some(day =>
     !day || !/^\d{4}-\d{2}-\d{2}$/.test(day.date) || !Array.isArray(day.slots) || day.slots.length > 50 ||
     day.slots.some(slot => !slot || !/^\d{2}:\d{2}$/.test(slot.label) || !/^[+-]\d{4}$/.test(slot.offset)) ||
-    !Array.isArray(day.rows) || day.rows.length > 64 || day.rows.some(row =>
+    !Array.isArray(day.rows) || day.rows.length > 100 || day.rows.some(row =>
       !row || typeof row.id !== "string" || typeof row.label !== "string" ||
       !Array.isArray(row.cells) || row.cells.length !== day.slots.length || row.cells.some(kind => !GRID_TYPES.includes(kind))
     )

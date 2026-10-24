@@ -125,7 +125,10 @@ def resolve_grid(hass, connection, msg):
 def websocket_grid(hass, connection, msg):
     try:
         coordinator, selected, status = resolve_grid(hass, connection, msg)
-        connection.send_result(msg["id"], grid_data(coordinator, selected) if coordinator else {"status": status, "days": []})
+        entity = er.async_get(hass).async_get(msg["entity_id"])
+        entry = hass.config_entries.async_get_entry(entity.config_entry_id)
+        personal = entry.data.get(CONF_ENTRY_KIND) == ENTRY_ACCOUNT
+        connection.send_result(msg["id"], grid_data(coordinator, selected, personal=personal) if coordinator else {"status": status, "days": [], "personal": personal})
     except AccountAccessError as error:
         connection.send_error(msg["id"], error.code, "Schedule grid is unavailable")
 

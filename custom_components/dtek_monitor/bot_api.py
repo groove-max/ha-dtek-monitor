@@ -248,7 +248,7 @@ async def websocket_bot_account(hass, connection, msg):
                 if selection(hass, entry, number)[1] is not coordinator:
                     raise SubmissionError("not_available")
             groups = account_snapshot(hass, connection, entry, number)["groups"]
-            result = grid_data(coordinator, groups)
+            result = grid_data(coordinator, groups, personal=True)
         else:
             if not all(
                 msg.get(k)

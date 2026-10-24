@@ -7,10 +7,10 @@ from .schedule import KYIV_TZ
 from .schedule_status import covers
 
 
-def grid_data(coordinator, selected=(), now=None):
+def grid_data(coordinator, selected=(), now=None, *, personal=False):
     now = (now or datetime.now(timezone.utc)).astimezone(KYIV_TZ)
     schedule = coordinator.overview
-    base = {"time_zone": "Europe/Kyiv", "today": now.date().isoformat(), "days": []}
+    base = {"time_zone": "Europe/Kyiv", "today": now.date().isoformat(), "days": [], "personal": personal}
     if (
         not coordinator.address_success
         or coordinator.address_error

@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Start the schedule grid with confirmed personal or building groups. Keep all operator groups available with search and a jump to the home group; preserve user filters during refresh and show unknown assignments explicitly.
+
 - Show source group IDs for Kyiv even when DTEK hides labels on its website. Keep published grids available, expose current building groups for explicit apartment selection and notify about verified group changes. Preserve publication/freshness checks, cabinet verification and the independent building calendars.
 
 - Integrate FastivProService's compact daily timeline from PR #12 as a built-in dashboard card. Add automatic loading, a permission-aware building picker, English/Ukrainian UI, shared grid validation/time helpers and browser regressions. Keep demos/YAML in examples; no manual JS resource installation is required.

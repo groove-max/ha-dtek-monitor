@@ -14,15 +14,19 @@ A schedule is the operator's plan, not a measurement of electricity at home.
 <a id="section-1"></a>
 ## Schedule grid
 
-The **Schedule** tab now opens a half-hour grid of all groups published by the
-selected operator. Building groups have an outline and a **My building** label;
+The **Schedule** tab opens a half-hour grid. It starts with **My group** when
+your personal assignment is confirmed, or **My building** for an address.
+All groups published by the operator remain available. Building groups have an outline and a **My building** label;
 your confirmed personal group also has **My group**. Choosing a row shows its
 exact intervals below the grid. This display does not change building groups,
 personal selection, calendars or Telegram notifications.
 
 Use **Grid / List** to choose the format. In the grid, choose today or one of the
-next six days, then **Groups → My building** to filter rows or **All groups** to
-see every group. In **List**, choose **My group** or **My building · all groups**.
+next six days, then **Groups → My group / My building / All groups**.
+In **All groups**, search by group ID or name, or press **Go to my group**.
+The time header and group names stay visible while scrolling. If your assignment
+is unknown, the card explains this and never chooses the first group as yours.
+Search and scope choices survive background refreshes; PNG export uses the visible rows. In **List**, choose **My group** or **My building · all groups**.
 Each calendar keeps its own navigation; returning to the grid retains the date,
 filter and scroll position. These controls do not change your apartment's group.
 On a phone, scroll the grid
