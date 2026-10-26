@@ -1,13 +1,13 @@
-import "./account-documents.js?v=2.0.0-rc4";
-import "./account-options.js?v=2.0.0-rc4";
-import "./account-energy-settings.js?v=2.0.0-rc4";
-import "./account-profile-card.js?v=2.0.0-rc4";
-import "./account-readings-card.js?v=2.0.0-rc4";
-import "./account-history-card.js?v=2.0.0-rc4";
-import "./schedule-card.js?v=2.0.0-rc4";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc4";
-import { accountNumber } from "./account-number.js?v=2.0.0-rc4";
-import { zoneKey, isUkrainian, languageLocale, cabinetGroupNotice, el, date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc4";
+import "./account-documents.js?v=2.0.0-rc5";
+import "./account-options.js?v=2.0.0-rc5";
+import "./account-energy-settings.js?v=2.0.0-rc5";
+import "./account-profile-card.js?v=2.0.0-rc5";
+import "./account-readings-card.js?v=2.0.0-rc5";
+import "./account-history-card.js?v=2.0.0-rc5";
+import "./schedule-card.js?v=2.0.0-rc5";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc5";
+import { accountNumber } from "./account-number.js?v=2.0.0-rc5";
+import { zoneKey, isUkrainian, languageLocale, cabinetGroupNotice, el, date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc5";
 
 const words = {
   en: {

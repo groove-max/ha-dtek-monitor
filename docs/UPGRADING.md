@@ -8,6 +8,12 @@ Version 2 adds My DTEK, cabinets for four operators, history, readings and sugge
 
 RC4 adds optional [meter photos and cabinet documents](ENERGY_AND_READINGS.md#attach-a-meter-photo). For these features in Telegram, use **Bot 0.5.0-rc4 or newer**. Update Monitor first and restart HA. New-document notifications must be enabled separately in HA and the bot; an accepted photo does not prove that an inspection act has been issued.
 
+## RC5 update
+
+Install **Monitor 2.0.0-rc5** and **Bot 0.5.0-rc5** for the complete feature set. Schedules start with your groups; all groups remain available. Coloured bands use the published minute boundaries on an hourly scale, including quarter-hours. Older bot/integration combinations retain their available precision. The new compact HA card loads automatically. Reload the HA page after updating.
+
+The bot now allows several family members in one personal profile, with separate private menus and notifications. After Apply, temporary ingress gateway errors during restart keep the progress visible; success still requires confirmation from the restarted app. Recovery notifications from periodic sensors need a new report after the configured delay; see the [bot power guide](https://github.com/groove-max/ha-dtek-telegram-bot/blob/main/docs/POWER.md).
+
 ## Before updating
 
 1. Use Home Assistant **2026.3.0 or newer**.

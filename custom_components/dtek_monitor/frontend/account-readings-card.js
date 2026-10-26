@@ -1,11 +1,11 @@
-import "./account-readback.js?v=2.0.0-rc4";
-import { zoneKey, isUkrainian,  embeddedCSS, date, number } from "./account-ui.js?v=2.0.0-rc4";
-import "./account-check-card.js?v=2.0.0-rc4";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc4";
+import "./account-readback.js?v=2.0.0-rc5";
+import { zoneKey, isUkrainian,  embeddedCSS, date, number } from "./account-ui.js?v=2.0.0-rc5";
+import "./account-check-card.js?v=2.0.0-rc5";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc5";
 /* Explicit readings submission. HA state updates never replace an edited form. */
-import { accountNumber, cabinetLink } from "./account-number.js?v=2.0.0-rc4";
-import { DtekEnergyEditor, energyMessage } from "./account-energy-editor.js?v=2.0.0-rc4";
-import { preparePhoto, photoPreview } from "./account-photos.js?v=2.0.0-rc4";
+import { accountNumber, cabinetLink } from "./account-number.js?v=2.0.0-rc5";
+import { DtekEnergyEditor, energyMessage } from "./account-energy-editor.js?v=2.0.0-rc5";
+import { preparePhoto, photoPreview } from "./account-photos.js?v=2.0.0-rc5";
 const labels = {
   en: {
     photo: "Meter photo", photoHelp: "Optional: photograph the official meter with its reading, serial number and tariff zone visible. For Day/Night, attach a photo for each zone. JPEG, PNG or WebP, up to 20 MB. Images are optimized locally; check that the preview is legible.",

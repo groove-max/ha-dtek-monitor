@@ -6,8 +6,8 @@ function loadWhenReady() {
     return;
   }
   Promise.all([
-    import("./account-workspace-card.js?v=2.0.0-rc4"),
-    import("./outage-card.js?v=2.0.0-rc4"),
+    import("./account-workspace-card.js?v=2.0.0-rc5"),
+    import("./outage-card.js?v=2.0.0-rc5"),
   ]).catch(() => {
     // Report only a generic loading failure, never private state.
     console.error("DTEK cards could not load. Reload the Home Assistant page.");

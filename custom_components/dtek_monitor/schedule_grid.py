@@ -7,6 +7,42 @@ from .schedule import KYIV_TZ
 from .schedule_status import covers
 
 
+def _cell_kind(intervals, coverage, group, start, stop):
+    if covers(coverage, group, "outage", start, stop):
+        if any(i.kind == "outage" and i.start < stop and i.end > start for i in intervals):
+            return "outage"
+        if any(i.kind == "possible" and i.source == "daily" and i.start < stop and i.end > start for i in intervals):
+            return "possible"
+        return "clear"
+    if covers(coverage, group, "possible", start, stop):
+        return "forecast" if any(i.start < stop and i.end > start for i in intervals) else "forecast_clear"
+    return "unknown"
+
+
+def _segments(intervals, coverage, group, start, end):
+    """Partition by actual evidence boundaries; offsets are elapsed UTC minutes.
+
+    Include coverage boundaries too: an unpublished quarter-hour must not be
+    coloured clear. UTC offsets keep repeated civil hours distinct.
+    """
+    boundaries = {start, end}
+    for item in (*intervals, *coverage):
+        for value in (item.start, item.end):
+            value = value.astimezone(timezone.utc)
+            if start < value < end:
+                boundaries.add(value)
+    points = sorted(boundaries)
+    result = []
+    for left, right in zip(points, points[1:]):
+        kind = _cell_kind(intervals, coverage, group, left, right)
+        a, b = (left - start).total_seconds() / 60, (right - start).total_seconds() / 60
+        if result and result[-1]["kind"] == kind:
+            result[-1]["end"] = b
+        else:
+            result.append({"start": a, "end": b, "kind": kind})
+    return result
+
+
 def grid_data(coordinator, selected=(), now=None, *, personal=False):
     now = (now or datetime.now(timezone.utc)).astimezone(KYIV_TZ)
     schedule = coordinator.overview
@@ -63,31 +99,7 @@ def grid_data(coordinator, selected=(), now=None, *, personal=False):
                     datetime.fromisoformat(slot["start"]),
                     datetime.fromisoformat(slot["end"]),
                 )
-                if covers(coverage, group.id, "outage", start, stop):
-                    if any(
-                        i.kind == "outage" and i.start < stop and i.end > start
-                        for i in intervals
-                    ):
-                        cell = "outage"
-                    elif any(
-                        i.kind == "possible"
-                        and i.source == "daily"
-                        and i.start < stop
-                        and i.end > start
-                        for i in intervals
-                    ):
-                        cell = "possible"
-                    else:
-                        cell = "clear"
-                elif covers(coverage, group.id, "possible", start, stop):
-                    cell = (
-                        "forecast"
-                        if any(i.start < stop and i.end > start for i in intervals)
-                        else "forecast_clear"
-                    )
-                else:
-                    cell = "unknown"
-                cells.append(cell)
+                cells.append(_cell_kind(intervals, coverage, group.id, start, stop))
             rows.append(
                 {
                     "id": group.id,
@@ -95,6 +107,9 @@ def grid_data(coordinator, selected=(), now=None, *, personal=False):
                     "home": group.id in home,
                     "selected": group.id in selected,
                     "cells": cells,
+                    # Keep legacy half-hour cells for older consumers. New
+                    # renderers use these exact, gap-free timeline segments.
+                    "segments": _segments(intervals, coverage, group.id, day.astimezone(timezone.utc), end),
                 }
             )
         days.append({"date": day.date().isoformat(), "slots": slots, "rows": rows})

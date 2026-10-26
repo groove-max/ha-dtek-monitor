@@ -14,7 +14,13 @@ A schedule is the operator's plan, not a measurement of electricity at home.
 <a id="section-1"></a>
 ## Schedule grid
 
-The **Schedule** tab opens a half-hour grid. It starts with **My group** when
+The **Schedule** tab opens a grid with hourly marks. Coloured bands follow the
+exact interval boundaries: **12:15–13:45** starts a quarter of the way into the
+12:00 column and ends three quarters into the 13:00 column. Other minute values
+are also preserved when provided by the operator. Tooltips, interval details,
+the compact card and PNG exports use the same times.
+
+The grid starts with **My group** when
 your personal assignment is confirmed, or **My building** for an address.
 All groups published by the operator remain available. Building groups have an outline and a **My building** label;
 your confirmed personal group also has **My group**. Choosing a row shows its

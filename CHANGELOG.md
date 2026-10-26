@@ -4,11 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.0-rc5] - 2026-10-26
+
+**Regular GitHub release**, without the Pre-release flag. Requires Home Assistant 2026.3.0+.
+
+- Keep the cabinet link, document card and account-number controls stable during background HA updates. Refresh profile data without temporarily collapsing the card; preserve scroll, focus and expanded details when the data is unchanged. Recheck access when the account, user or connection changes.
+
+- Draw schedule bands at their exact minute boundaries on an hourly scale in the grid, compact card and PNG export. Preserve quarter-hours, other minute offsets, partial coverage and DST; expose exact segments alongside legacy half-hour cells for compatible bot upgrades.
+
 - Start the schedule grid with confirmed personal or building groups. Keep all operator groups available with search and a jump to the home group; preserve user filters during refresh and show unknown assignments explicitly.
 
 - Show source group IDs for Kyiv even when DTEK hides labels on its website. Keep published grids available, expose current building groups for explicit apartment selection and notify about verified group changes. Preserve publication/freshness checks, cabinet verification and the independent building calendars.
 
 - Integrate FastivProService's compact daily timeline from PR #12 as a built-in dashboard card. Add automatic loading, a permission-aware building picker, English/Ukrainian UI, shared grid validation/time helpers and browser regressions. Keep demos/YAML in examples; no manual JS resource installation is required.
+
+**Upgrade:** install DTEK Monitor **2.0.0-rc5**, restart HA and reload its page. Then update Telegram Bot to **0.5.0-rc5** for exact-minute PNGs and the latest notification fixes. Existing accounts, building links, entity IDs and energy calibration are preserved. Find the compact schedule card in **Edit dashboard → Add card → DTEK · Компактний графік / Compact schedule**; do not install a separate JavaScript file.
+
+[Upgrade guide](docs/UPGRADING.md) · [Оновлення](docs/UPGRADING.uk.md) · [Schedule cards](docs/SCHEDULES.md) · [Графіки](docs/SCHEDULES.uk.md)
 
 ## [2.0.0-rc4] - 2026-10-23
 

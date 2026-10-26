@@ -216,6 +216,15 @@ class ReadingsCardTests(unittest.IsolatedAsyncioTestCase):
             0,
         )
 
+    async def test_identity_masks_on_user_or_permission_change(self):
+        await self.page.evaluate("""() => {const normal=hass.callWS;hass.callWS=async msg=>msg.type==='dtek_monitor/account_identity'?{masked:'••••0001',...(msg.reveal?{number:'1234500001'}:{})}:normal(msg);}""")
+        for user in [{'id':'other','is_admin':True},{'id':'other','is_admin':False}]:
+            await self.page.get_by_role('button',name='Show account number',exact=True).click()
+            # The synthetic endpoint explicitly provides a revealed number.
+            await self.page.get_by_text('Account number: 1234500001',exact=True).wait_for()
+            await self.page.evaluate("user => {hass={...hass,user};card.shadowRoot.querySelector('dtek-account-number').hass=hass;}",user)
+            self.assertEqual(await self.page.get_by_text('Account number: 1234500001',exact=True).count(),0)
+
     async def test_standalone_number_card_masks_again_after_reconnection(self):
         await self.page.evaluate("""() => {
           card.remove();window.numberCard=document.createElement('dtek-account-number-card');
@@ -227,6 +236,13 @@ class ReadingsCardTests(unittest.IsolatedAsyncioTestCase):
             "button", name="Show account number", exact=True
         ).click()
         await self.page.get_by_text("Account number: 1234500001", exact=True).wait_for()
+        await self.page.get_by_role('button',name='Copy account number',exact=True).focus()
+        await self.page.evaluate('''() => {
+          window.identity=numberCard.shadowRoot.querySelector('dtek-account-number');
+          window.focused=identity.shadowRoot.activeElement;
+          numberCard.hass={...identity._hass,states:{unrelated:{state:'new'}}};
+        }''')
+        self.assertTrue(await self.page.evaluate('identity.shadowRoot.activeElement===focused'))
         await self.page.evaluate(
             "numberCard.remove();document.querySelector('main').append(numberCard)"
         )

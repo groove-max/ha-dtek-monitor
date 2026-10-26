@@ -1,4 +1,4 @@
-import { zoneKey, isUkrainian,  date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc4";
+import { zoneKey, isUkrainian,  date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc5";
 /* Local references only. No operation in this editor submits readings to DTEK. */
 const words = {
   en: {

@@ -1,5 +1,5 @@
-import { outageText } from "./outage-card-text.js?v=2.0.0-rc4";
-import { callGridWS } from "./schedule-grid-data.js?v=2.0.0-rc4";
+import { outageText } from "./outage-card-text.js?v=2.0.0-rc5";
+import { callGridWS } from "./schedule-grid-data.js?v=2.0.0-rc5";
 
 class DtekOutageCardEditor extends HTMLElement {
   constructor() { super(); this.attachShadow({mode: "open"}); this._seq = 0; }

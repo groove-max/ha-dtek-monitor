@@ -1,5 +1,5 @@
-import { isUkrainian } from "./account-ui.js?v=2.0.0-rc4";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc4";
+import { isUkrainian } from "./account-ui.js?v=2.0.0-rc5";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc5";
 export async function copyValue(value){
   if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);return;}
   const input=document.createElement('textarea');input.value=value;input.style.cssText='position:fixed;left:-10000px';document.body.append(input);
@@ -11,11 +11,19 @@ class DtekAccountNumber extends HTMLElement {
   constructor() {
     super(); this.attachShadow({mode:"open"}); this._seq=0; this._number=null;
   }
-  set hass(value) { this._hass=value; this._render(); }
+  set hass(value) {
+    const first=!this._hass;
+    const changed=this._hass && (this._hass.user?.id!==value?.user?.id || this._hass.user?.is_admin!==value?.user?.is_admin || this._hass.connection!==value?.connection);
+    this._hass=value;
+    if(changed){this._seq++;this._number=null;this._masked=null;this._pending=false;this._error=false;}
+    this._render();
+    if((first||changed)&&this.isConnected)this._load(false);
+  }
   set entity(value) {
     if (value===this._entity) return;
     this._entity=value; this._seq++; this._number=null; this._masked=null;
     this._pending=false; this._error=false;
+    this._render();
     if(this.isConnected) this._load(false);
   }
   connectedCallback() { this._load(false); }
@@ -47,6 +55,9 @@ class DtekAccountNumber extends HTMLElement {
   }
   _render() {
     const w=this.words;
+    const key=JSON.stringify([w,this._number,this._masked,this._pending,this._error]);
+    if(key===this._renderKey)return;
+    this._renderKey=key;
     const style=document.createElement("style");
     style.textContent=":host{display:block;margin:12px 0}.line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}button{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--divider-color,#aaa);border-radius:6px;background:transparent;color:var(--primary-text-color);cursor:pointer;min-width:40px;min-height:40px}svg{width:22px;height:22px}.value{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}small{color:var(--error-color,#b22)}";
     const line=document.createElement("div");line.className="line";
@@ -79,10 +90,14 @@ export function accountNumber(hass, entity) {
 class DtekCabinetLink extends HTMLElement {
   constructor() {super();this.attachShadow({mode:"open"});this._seq=0;}
   set hass(value) {
+    const first=!this._hass;
     const changed=this._hass && (this._hass.user?.id!==value?.user?.id || this._hass.connection!==value?.connection || this._hass.user?.is_admin!==value?.user?.is_admin);
     this._hass=value;
-    if(changed){this._seq++;this.shadowRoot.replaceChildren();if(this.isConnected)this._load();}
+    if(changed){this._seq++;this.shadowRoot.replaceChildren();}
+    if((first||changed)&&this.isConnected)this._load();
   }
+  set label(value){this._label=value;const link=this.shadowRoot.querySelector('a');if(link&&link.textContent!==value)link.textContent=value;}
+  get label(){return this._label;}
   set entity(value) {
     if(this._entity===value)return;
     this._entity=value;this._seq++;this.shadowRoot.replaceChildren();

@@ -103,7 +103,7 @@ class OutageCardTests(unittest.IsolatedAsyncioTestCase):
               card.hass={...demoHass,user:{id:date},callWS:async()=>data};
             }""", {"date": date, "start": start, "count": count})
             await self.settled()
-            self.assertEqual(await self.page.locator(".cell").count(), count)
+            self.assertEqual(await self.page.locator(".cell").evaluate_all("els=>els.reduce((n,e)=>n+parseFloat(e.style.flexGrow),0)"), count*30)
             if count == 50:
                 self.assertEqual(await self.page.locator(".interval b").inner_text(), "03:30 UTC+0300–03:00 UTC+0200")
 
@@ -117,6 +117,22 @@ class OutageCardTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Оберіть будинок", await self.page.locator(".feedback").inner_text())
         self.assertTrue(await self.page.get_by_role("button", name="Оновити графік").is_disabled())
 
+    async def test_minute_intervals_match_proportional_bands(self):
+        for start, end, label in [(735, 825, "12:15–13:45"), (727, 799, "12:07–13:19")]:
+            await self.page.evaluate("""async ([start,end]) => {
+              const data=structuredClone(demoData),row=data.days[0].rows.find(r=>r.id==='GPV2.2');
+              row.segments=[{start:0,end:start,kind:'clear'},{start,end,kind:'outage'},
+                {start:end,end:1440,kind:'clear'}];
+              card.hass={...demoHass,user:{id:String(start)},callWS:async()=>data};
+            }""", [start, end])
+            await self.settled()
+            self.assertEqual(await self.page.locator(".interval b").inner_text(), label)
+            self.assertEqual(await self.page.locator(".cell.outage").evaluate_all(
+                "els=>els.reduce((n,e)=>n+parseFloat(e.style.flexGrow),0)"), end-start)
+            for width in [1200, 375, 320]:
+                await self.page.set_viewport_size({"width": width, "height": 760})
+                self.assertTrue(await self.page.evaluate("document.documentElement.scrollWidth<=innerWidth"))
+
     async def test_request_timeout_clears_grid_and_allows_retry(self):
         await self.page.clock.install()
         await self.page.evaluate("() => {demoHass.callWS=()=>new Promise(()=>{});void card._load();}")
@@ -125,7 +141,8 @@ class OutageCardTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await self.page.locator(".cell").count(), 0)
         self.assertFalse(await self.page.get_by_role("button", name="Оновити графік").is_disabled())
         await self.page.evaluate("() => {demoHass.callWS=async()=>demoData;return card._load();}")
-        self.assertEqual(await self.page.locator(".cell").count(), 48)
+        self.assertEqual(await self.page.locator(".interval").count(), 3)
+        self.assertEqual(await self.page.locator(".cell").evaluate_all("els=>els.reduce((n,e)=>n+parseFloat(e.style.flexGrow),0)"), 1440)
 
     async def test_bad_data_never_becomes_empty_schedule(self):
         await self.page.evaluate("() => {demoHass.callWS=async()=>({status:'ready',days:[{date:'bad',slots:[],rows:[]}]});return card._load();}")

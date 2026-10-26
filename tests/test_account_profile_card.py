@@ -33,6 +33,34 @@ class ProfileCardTests(unittest.IsolatedAsyncioTestCase):
         await self.browser.close()
         await self.p.stop()
 
+    async def test_background_refresh_does_not_collapse_profile_or_reset_focus(self):
+        await self.page.get_by_text('Meter details',exact=True).click()
+        await self.page.get_by_role('button',name='Refresh',exact=True).focus()
+        before=await self.page.evaluate('''() => {
+          const normal=hass.callWS;
+          hass.callWS=msg=>msg.type==='dtek_monitor/account_profile'
+            ? new Promise(resolve=>window.releaseProfile=resolve):normal(msg);
+          window.focused=card.shadowRoot.activeElement;
+          return card.getBoundingClientRect().height;
+        }''')
+        await self.page.evaluate("card.hass={...hass,states:{'sensor.first':{last_updated:'new'}}}")
+        self.assertEqual(await self.page.evaluate('card.getBoundingClientRect().height'),before)
+        self.assertTrue(await self.page.evaluate('card.shadowRoot.activeElement===focused'))
+        await self.page.evaluate("releaseProfile({...profile('sensor.first'),fetched_at:'2026-10-18T12:30:00+03:00'})")
+        self.assertEqual(await self.page.evaluate('card.getBoundingClientRect().height'),before)
+        self.assertTrue(await self.page.evaluate('card.shadowRoot.activeElement===focused'))
+        self.assertTrue(await self.page.locator('details').evaluate('(e)=>e.open'))
+        self.assertIn('12:30',await self.page.locator('ha-card').inner_text())
+
+    async def test_failed_background_refresh_clears_profile_and_displays_error(self):
+        await self.page.evaluate('''() => {
+          const normal=hass.callWS;hass.callWS=msg=>msg.type==='dtek_monitor/account_profile'
+            ? Promise.reject({code:'unauthorized'}):normal(msg);
+          card.hass={...hass,states:{'sensor.first':{last_updated:'failed'}}};
+        }''')
+        await self.page.get_by_text('Profile unavailable or access denied.',exact=True).wait_for()
+        self.assertEqual(await self.page.get_by_text('NIK example',exact=True).count(),0)
+
     async def test_address_always_visible_masking_copy_safe_render_and_mobile_width(
         self,
     ):

@@ -123,7 +123,7 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
         ).click()
         self.assertIn("11:00–14:30", await self.page.locator(".details").inner_text())
         self.assertEqual(
-            await self.page.locator('tr[data-group="GPV6.2"] td.unknown').count(), 48
+            await self.page.locator('tr[data-group="GPV6.2"] td.unknown').count(), 24
         )
         await self.page.get_by_label("Date", exact=True).select_option("2026-10-20")
         self.assertGreater(await self.page.locator("td.forecast").count(), 0)
@@ -135,6 +135,34 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
         await self.page.get_by_text(
             "No schedule is published for this date yet.", exact=True
         ).wait_for()
+
+    async def test_exact_minute_bands_details_and_png_use_the_same_intervals(self):
+        for start,end,label in ((735,825,'12:15–13:45'),(727,799,'12:07–13:19')):
+            await self.page.evaluate("""([start,end])=>{
+              const row=data.days[0].rows.find(r=>r.selected);
+              row.segments=[{start:0,end:start,kind:'clear'},{start,end,kind:'outage'},{start:end,end:1440,kind:'clear'}];
+              card.shadowRoot.querySelector('dtek-schedule-grid').load();
+            }""",[start,end])
+            await self.page.get_by_text('Planned outage: '+label,exact=True).wait_for()
+            self.assertEqual(await self.page.locator('tbody tr td').count(),24)
+            bands=self.page.locator('tbody .segment.outage')
+            self.assertEqual(await bands.count(),2)
+            left=await bands.first.evaluate('e=>parseFloat(e.style.left)')
+            self.assertAlmostEqual(left,(start%60)/60*100,delta=0.001)
+            await self.page.evaluate("""()=>{
+              const create=document.createElement.bind(document);
+              document.createElement=(...args)=>{const e=create(...args);if(args[0]==='canvas')window.exportCanvas=e;return e;};
+            }""")
+            async with self.page.expect_download():
+                await self.page.get_by_role('button',name='Save PNG',exact=True).click()
+            for minute,colour in ((start-4,[237,244,244]),(start+4,[233,166,59]),(end-4,[233,166,59]),(end+4,[237,244,244])):
+                pixel=await self.page.evaluate('m=>Array.from(exportCanvas.getContext("2d").getImageData(Math.round(200+m/1440*1056),180,1,1).data).slice(0,3)',minute)
+                self.assertEqual(pixel,colour,(minute,label))
+
+    async def test_malformed_exact_segments_do_not_fall_back_to_rounded_cells(self):
+        await self.page.evaluate("""()=>{data.days[0].rows[0].segments=[{start:0,end:9999,kind:'clear'}];card.shadowRoot.querySelector('dtek-schedule-grid').load();}""")
+        await self.page.get_by_text('The grid is unavailable. Refresh or check the connection.',exact=True).wait_for()
+        self.assertFalse(await self.page.locator('table').is_visible())
 
     async def test_refresh_preserves_controls_and_group_focus(self):
         await self.page.evaluate(
@@ -222,7 +250,7 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
     async def test_partial_grid_keeps_unknown_cells_visible(self):
         await self.page.get_by_label("Groups", exact=True).select_option("all")
         self.assertIn("Only part", await self.page.locator(".feedback").inner_text())
-        self.assertEqual(await self.page.locator("td.unknown").count(), 48)
+        self.assertEqual(await self.page.locator("td.unknown").count(), 24)
         await self.page.get_by_label("Groups", exact=True).select_option("home")
         self.assertEqual(await self.page.locator(".feedback").inner_text(), "")
         await self.page.get_by_text("Update details", exact=True).click()

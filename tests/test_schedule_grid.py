@@ -41,6 +41,44 @@ def overview_fixture():
 
 
 class GridTests(unittest.TestCase):
+    def test_segments_preserve_quarters_arbitrary_minutes_and_midnight(self):
+        for a, b in ((735, 825), (727, 799), (1435, 1455)):
+            with self.subTest(minutes=(a, b)):
+                c, home, _, _ = overview_fixture()
+                day = home.fetched_at.astimezone(adapter.KYIV_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+                c.overview = replace(c.overview, intervals=(contract.Interval('GPV3.1', 'outage', day+timedelta(minutes=a), day+timedelta(minutes=b), 'daily'),))
+                result = grid.grid_data(c, now=home.fetched_at)['days'][0]
+                row = next(r for r in result['rows'] if r['id']=='GPV3.1')
+                actual = [p for p in row['segments'] if p['kind']=='outage']
+                self.assertEqual(actual, [dict(start=a, end=min(b,1440), kind='outage')])
+                self.assertEqual(row['segments'][0]['start'], 0)
+                self.assertEqual(row['segments'][-1]['end'], 1440)
+                self.assertEqual(len(row['cells']), 48)  # Old bot contract remains usable.
+
+    def test_partial_coverage_is_split_at_exact_boundaries(self):
+        c, home, _, _ = overview_fixture()
+        day = home.fetched_at.astimezone(adapter.KYIV_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+        c.overview = replace(c.overview, intervals=(), coverage=(contract.Coverage('GPV3.1','outage',day+timedelta(minutes=735),day+timedelta(minutes=825)),))
+        row = next(r for r in grid.grid_data(c, now=home.fetched_at)['days'][0]['rows'] if r['id']=='GPV3.1')
+        self.assertEqual(row['segments'], [dict(start=0,end=735,kind='unknown'), dict(start=735,end=825,kind='clear'), dict(start=825,end=1440,kind='unknown')])
+
+    def test_daily_outage_takes_priority_over_possible_only_where_it_overlaps(self):
+        c, home, _, _ = overview_fixture()
+        day = home.fetched_at.astimezone(adapter.KYIV_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+        c.overview = replace(c.overview, intervals=tuple(contract.Interval('GPV3.1',kind,day+timedelta(minutes=a),day+timedelta(minutes=b),'daily') for kind,a,b in [('possible',720,840),('outage',735,825)]))
+        row = next(r for r in grid.grid_data(c, now=home.fetched_at)['days'][0]['rows'] if r['id']=='GPV3.1')
+        self.assertEqual([(s['start'],s['end'],s['kind']) for s in row['segments'] if s['kind']!='clear'], [(720,735,'possible'),(735,825,'outage'),(825,840,'possible')])
+
+    def test_exact_segments_use_elapsed_time_across_repeated_hour(self):
+        c, _, _, _ = overview_fixture()
+        day = datetime(2026,10,25,tzinfo=adapter.KYIV_TZ)
+        c.overview = replace(c.overview, intervals=(contract.Interval('GPV3.1','outage',day.replace(hour=3,minute=15,fold=0),day.replace(hour=3,minute=45,fold=1),'daily'),), coverage=(contract.Coverage('GPV3.1','outage',day,day+timedelta(days=1)),))
+        result = grid.grid_data(c, now=day)['days'][0]
+        row = next(r for r in result['rows'] if r['id']=='GPV3.1')
+        self.assertEqual(len(result['slots']),50)
+        self.assertEqual([s for s in row['segments'] if s['kind']=='outage'], [dict(start=195,end=285,kind='outage')])
+        self.assertEqual(row['segments'][-1]['end'],1500)
+
     def test_all_groups_are_returned_but_home_contract_stays_local(self):
         c, home, reading, _ = overview_fixture()
         result = grid.grid_data(c, ["GPV5.2"], now=home.fetched_at)

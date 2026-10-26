@@ -275,6 +275,10 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
     async def test_schedule_opens_one_operator_grid_with_home_and_personal_highlights(self):
         await self.page.get_by_role("tab", name="Schedule", exact=True).click()
         await self.page.locator("dtek-schedule-grid tbody tr").first.wait_for()
+        self.assertEqual(await self.page.get_by_label("Groups", exact=True).input_value(), "mine")
+        self.assertEqual(await self.page.locator("dtek-schedule-grid tbody tr").count(), 1)
+        self.assertEqual(await self.page.locator("dtek-schedule-grid tr.selected").count(), 1)
+        await self.page.get_by_label("Groups", exact=True).select_option("all")
         self.assertEqual(await self.page.locator("dtek-schedule-grid tbody tr").count(), 12)
         self.assertEqual(await self.page.locator("dtek-schedule-grid tr.home").count(), 2)
         self.assertEqual(await self.page.locator("dtek-schedule-grid tr.selected").count(), 1)
@@ -336,11 +340,19 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
     async def test_missing_personal_choice_keeps_building_list_and_full_grid(self):
         await self.page.evaluate("""() => {
           hass.states['sensor.schedule_1']={state:'not_selected',attributes:{}};
+          const normal=hass.callWS;
+          hass.callWS=async msg=>{const result=await normal(msg);
+            if(msg.type==='dtek_monitor/schedule_grid')for(const day of result.days)for(const row of day.rows)row.selected=false;
+            return result;};
           window.loadCardHelpers=async()=>({createCardElement:()=>{const e=document.createElement('div');e.className='test-calendar';e.textContent='Calendar';return e;}});
           hass.states['calendar.building_1']={state:'off'};
         }""")
         await self.page.get_by_role("tab", name="Schedule", exact=True).click()
         await self.page.locator("tbody tr").first.wait_for()
+        self.assertEqual(await self.page.get_by_label("Groups", exact=True).input_value(), "home")
+        self.assertEqual(await self.page.locator("tbody tr").count(), 2)
+        self.assertEqual(await self.page.locator("tr.selected").count(), 0)
+        await self.page.get_by_label("Groups", exact=True).select_option("all")
         self.assertEqual(await self.page.locator("tbody tr").count(), 12)
         await self.page.get_by_role("button", name="List", exact=True).click()
         await self.page.locator(".status:visible").filter(has_text="Choose yours in settings.").wait_for()

@@ -1,4 +1,4 @@
-import { isUkrainian } from "./account-ui.js?v=2.0.0-rc4";
+import { isUkrainian } from "./account-ui.js?v=2.0.0-rc5";
 /* Card-local account selection. No global active account or billing operations. */
 const words = {
   en: {workspaceHelp:"Choose the account shown in this card. For two apartments, add two My DTEK cards. The switching option below affects only this card; it does not add or remove DTEK accounts.", account:"Personal account", title:"Title (optional)", year:"Initial year (optional)", choose:"Choose an account", missing:"Current entity is unavailable", loading:"Loading accounts…", empty:"No readable accounts are connected. Select accounts in the integration settings.", error:"Could not load accounts.", retry:"Refresh account list", help:"This choice applies only to this card. Connect additional accounts in Settings → Devices & services → DTEK Monitor → Configure → Select personal accounts."},
