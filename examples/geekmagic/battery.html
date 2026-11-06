@@ -1,0 +1,20 @@
+{# Replace the entity IDs with your inverter sensors. Positive W = charging. #}
+{% set soc = states('sensor.display_battery_percent')|float(none) %}
+{% set power = states('sensor.display_battery_power')|float(none) %}
+{% set valid_soc = soc is not none and soc >= 0 and soc <= 100 %}
+{% set watts = power|round|int if power is not none and power > -10000000 and power < 10000000 else none %}
+{% set active = watts is not none and watts != 0 %}
+{% set color = '#38d9a0' if valid_soc and soc >= 35 else '#ffbf59' if valid_soc and soc >= 15 else '#ff6969' if valid_soc else '#71869b' %}
+<style>
+.gm-battery-tile{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#111d29;border-radius:6px;font-family:'DejaVu Sans',sans-serif;padding-top:3px;box-sizing:border-box}
+.gm-battery{width:32px;height:40px;border:1px solid {{ color }};border-radius:5px;position:relative;background:#0b1620}
+.gm-terminal{position:absolute;width:12px;height:3px;left:9px;top:-4px;border-radius:2px 2px 0 0;background:{{ color }}}
+.gm-fill-box{position:absolute;inset:2px;border-radius:3px;overflow:hidden}
+.gm-liquid{position:absolute;bottom:0;left:0;right:0;height:{{ soc if valid_soc else 0 }}%;background:linear-gradient(0deg,{{ color }}88,{{ color }});{% if active %}animation:gm-breathe 3.2s ease-in-out infinite;{% endif %}}
+.gm-surface{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent,rgba(255,255,255,.2),transparent);background-size:200% 100%;{% if active %}animation:gm-drift 3.2s linear infinite;{% endif %}}
+.gm-soc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#ffffff}
+.gm-watts{font-size:{{ 9 if watts is not none and watts|abs >= 1000 else 11 }}px;line-height:1.1;font-weight:700;color:{{ '#ff7070' if watts is not none and watts < 0 else '#47dfa7' if watts is not none and watts > 0 else '#a2b6ca' }}}
+@keyframes gm-breathe{0%,100%{opacity:.85}50%{opacity:1}}
+@keyframes gm-drift{0%{background-position:0% 0%}100%{background-position:-200% 0%}}
+</style>
+<div class="gm-battery-tile"><div class="gm-battery"><div class="gm-terminal"></div><div class="gm-fill-box"><div class="gm-liquid"><div class="gm-surface"></div></div></div><div class="gm-soc">{% if valid_soc %}{{ soc|round|int }}%{% else %}—{% endif %}</div></div><div class="gm-watts">{% if watts is none %}— Вт{% elif watts > 0 %}+{{ watts }} Вт{% elif watts < 0 %}−{{ watts|abs }} Вт{% else %}0 Вт{% endif %}</div></div>

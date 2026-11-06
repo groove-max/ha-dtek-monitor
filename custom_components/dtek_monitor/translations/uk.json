@@ -726,6 +726,12 @@
       },
       "account_reading_date_night": {
         "name": "Дата показів — Ніч"
+      },
+      "schedule_display": {
+        "name": "Дані графіка для дисплея"
+      },
+      "account_schedule_display": {
+        "name": "Дані графіка для дисплея"
       }
     },
     "calendar": {

@@ -103,6 +103,8 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up DTEK sensors from a config entry."""
+    from .display_sensor import AccountDisplaySensor, DTEKDisplaySensor
+
     if entry.data.get(CONF_ENTRY_KIND) == ENTRY_ACCOUNT:
         from .account_sensor import account_sensors
         from .account_schedule import (
@@ -114,6 +116,7 @@ async def async_setup_entry(
         async_add_entities(
             [
                 *discover(),
+                *(AccountDisplaySensor(entry, number) for number in entry.data[CONF_ACCOUNTS]),
                 *(
                     AccountGroupSensor(entry, number)
                     for number in entry.data[CONF_ACCOUNTS]
@@ -148,6 +151,7 @@ async def async_setup_entry(
                 for description in SENSOR_DESCRIPTIONS
             ),
             DTEKConnectionSensor(coordinator, entry),
+            DTEKDisplaySensor(coordinator, entry),
             DTEKWorksStatusSensor(coordinator, entry),
             DTEKScheduleStatusSensor(coordinator, entry),
             DTEKScheduleStatusSensor(coordinator, entry, day_offset=1),

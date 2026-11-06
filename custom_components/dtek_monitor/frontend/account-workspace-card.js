@@ -1,13 +1,13 @@
-import "./account-documents.js?v=2.0.0-rc5";
-import "./account-options.js?v=2.0.0-rc5";
-import "./account-energy-settings.js?v=2.0.0-rc5";
-import "./account-profile-card.js?v=2.0.0-rc5";
-import "./account-readings-card.js?v=2.0.0-rc5";
-import "./account-history-card.js?v=2.0.0-rc5";
-import "./schedule-card.js?v=2.0.0-rc5";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc5";
-import { accountNumber } from "./account-number.js?v=2.0.0-rc5";
-import { zoneKey, isUkrainian, languageLocale, cabinetGroupNotice, el, date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc5";
+import "./account-documents.js?v=2.0.0-rc6";
+import "./account-options.js?v=2.0.0-rc6";
+import "./account-energy-settings.js?v=2.0.0-rc6";
+import "./account-profile-card.js?v=2.0.0-rc6";
+import "./account-readings-card.js?v=2.0.0-rc6";
+import "./account-history-card.js?v=2.0.0-rc6";
+import "./schedule-card.js?v=2.0.0-rc6";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc6";
+import { accountNumber } from "./account-number.js?v=2.0.0-rc6";
+import { zoneKey, isUkrainian, languageLocale, cabinetGroupNotice, el, date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc6";
 
 const words = {
   en: {
@@ -19,7 +19,8 @@ const words = {
     account: "Personal account", choose: "Choose an account", loading: "Loading accounts…", error: "Could not load your accounts. Try again.",
     empty: "No personal accounts are connected yet. Connect a DTEK cabinet or choose accounts to monitor in integration settings.", missing: "This account is unavailable. Check the connection or choose another account.",
     connect: "Connect DTEK", manage: "Manage connections and notifications", retry: "Refresh account list",
-    send: "Enter readings", documents: "DTEK documents", history: "Reading history", latest: "Latest DTEK meter reading", usage: "Consumption reported by DTEK",
+    send: "Enter readings", documents: "DTEK documents", history: "Reading history", latest: "Latest DTEK meter reading", usage: "Latest monthly total from DTEK",
+    usageNote: "Submitted readings and DTEK’s monthly consumption totals update separately.", usagePending: "The received data does not yet include a total for {period}.", usageEmpty: "No published monthly totals are available yet.", usageUnavailable: "The monthly total is temporarily unavailable.",
     readingNote: "Cumulative meter reading", noReading: "DTEK has not provided a reading yet.", unit: "kWh", GENERAL: "Single zone", DAY: "Day", NIGHT: "Night",
     group: "My outage group", groupEmpty: "Not selected", scheduleLink: "View schedule", details: "Account and meter details", detailsShort: "Details",
     partialData: "Some meter data is temporarily unavailable. Other sections remain available.",
@@ -45,7 +46,8 @@ const words = {
     account: "Особовий рахунок", choose: "Оберіть рахунок", loading: "Завантаження рахунків…", error: "Не вдалося завантажити рахунки. Спробуйте ще раз.",
     empty: "Особові рахунки ще не підключені. Підключіть кабінет ДТЕК або оберіть рахунки для моніторингу в налаштуваннях інтеграції.", missing: "Цей рахунок недоступний. Перевірте підключення або оберіть інший рахунок.",
     connect: "Підключити ДТЕК", manage: "Керувати підключеннями та сповіщеннями", retry: "Оновити список рахунків",
-    send: "Внести покази", documents: "Документи ДТЕК", history: "Історія показів", latest: "Останні покази в ДТЕК", usage: "Споживання за даними ДТЕК",
+    send: "Внести покази", documents: "Документи ДТЕК", history: "Історія показів", latest: "Останні покази в ДТЕК", usage: "Останній місячний підсумок ДТЕК",
+    usageNote: "Передані покази та місячні підсумки споживання ДТЕК оновлюються окремо.", usagePending: "В отриманих даних ще немає підсумку за {period}.", usageEmpty: "Опублікованих місячних підсумків поки немає.", usageUnavailable: "Місячний підсумок тимчасово недоступний.",
     readingNote: "Накопичувальні покази лічильника", noReading: "ДТЕК ще не надав показів.", unit: "кВт·год", GENERAL: "Одна зона", DAY: "День", NIGHT: "Ніч",
     group: "Моя група відключень", groupEmpty: "Не обрана", scheduleLink: "Переглянути графік", details: "Реквізити та лічильник", detailsShort: "Реквізити",
     partialData: "Частина даних лічильника тимчасово недоступна. Інші розділи залишаються доступними.",
@@ -77,6 +79,7 @@ const css = `
   .panel{padding:24px}.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
   .tile{padding:18px;border:1px solid var(--divider-color,#ddd);border-radius:14px}.tile h3{margin:0 0 12px;font-size:.95em;font-weight:500;color:var(--secondary-text-color,#596979)}
   .value{font-size:1.8em;line-height:1.2;font-weight:650;font-variant-numeric:tabular-nums;margin:8px 0}.unit{font-size:.5em;font-weight:400;margin-left:6px}
+  .usage-period{font-weight:600;margin:0 0 6px}
   .muted,small{color:var(--secondary-text-color,#596979);font-size:.88em}small{display:block;margin-top:5px}p,small{line-height:1.5;overflow-wrap:anywhere}
   .group{margin:20px 0;padding:18px;border-radius:14px;background:var(--secondary-background-color,#f4f7fa)}.group h3{margin:0;font-size:1em}.group strong{display:inline-block;margin-left:10px;font-size:1.15em}.group h3{display:inline}.group p{margin:8px 0 0}
   .actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}.primary{flex-grow:1}
@@ -90,6 +93,7 @@ const css = `
   .notice{margin:14px 0;color:var(--secondary-text-color,#596979)}.notice:empty{display:none}.empty{padding:24px}
   dialog{max-width:min(440px,calc(100vw - 32px));border:1px solid var(--divider-color,#ddd);border-radius:16px;padding:24px;color:inherit;background:var(--card-background-color,#fff)}dialog::backdrop{background:#0008}dialog h3{margin-top:0}
   @container(max-width:520px){.header{padding:18px 16px}.panel{padding:18px 16px}.address{font-size:1.25em}.tiles{gap:10px}.tile{padding:12px}.tile h3{font-size:.85em}.value{font-size:1.45em}.unit{display:block;margin:4px 0 0;font-size:.6em}nav{padding:0 6px;flex-wrap:wrap}nav button{flex:1 1 auto;font-size:.85em;padding:10px 9px}.actions button{width:100%}}
+  @container(max-width:420px){.tiles{grid-template-columns:minmax(0,1fr)}}
   @media(prefers-reduced-motion:no-preference){button{transition:background-color .12s}}
 `;
 
@@ -258,9 +262,32 @@ class DtekAccountWorkspaceCard extends HTMLElement {
     return Number.isFinite(stamp.getTime()) ? new Intl.DateTimeFormat(languageLocale(this._hass.language || "en"),{month:"long",year:"numeric",timeZone:"Europe/Kyiv"}).format(stamp) : "—";
   }
   _state(role) { return this._hass.states?.[this._account?.roles?.[role]]; }
+  _previousMonth(now = new Date()) {
+    const parts = new Intl.DateTimeFormat("en", {year:"numeric", month:"2-digit", timeZone:"Europe/Kyiv"}).formatToParts(now);
+    const year=Number(parts.find(p=>p.type==="year").value), month=Number(parts.find(p=>p.type==="month").value);
+    return month===1 ? `${year-1}-12` : `${year}-${String(month-1).padStart(2,"0")}`;
+  }
+  _updateConsumption() {
+    const container=this._consumptionSummary, usage=this._state("account_consumption:all"), t=this.t;
+    const period=usage?.attributes?.period, previous=this._previousMonth();
+    const signature=JSON.stringify([this._hass.language,usage?.state,period,previous]);
+    // Unrelated HA sensor updates must not replace unchanged text/scroll anchors.
+    if (container.dataset.signature===signature) return;
+    container.dataset.signature=signature;
+    container.replaceChildren(el("h3",t.usage));
+    const valid=typeof usage?.state==="string" && usage.state.trim()!=="" && Number.isFinite(Number(usage.state)) && /^\d{4}-(0[1-9]|1[0-2])$/.test(period || "") && period<=previous;
+    if (valid) {
+      const value=el("p",number(usage.state,this._hass.language),"value");value.append(el("span",t.unit,"unit"));
+      container.append(el("p",this._period(period),"usage-period"),value);
+      if (period<previous) container.append(el("p",t.usagePending.replace("{period}",this._period(previous)),"muted"));
+    } else {
+      container.append(el("p",usage?.state==="unknown" && !period ? t.usageEmpty : t.usageUnavailable,"muted"));
+    }
+    container.append(el("small",t.usageNote));
+  }
   _updateOverview() {
     if (!this._overview || !this._account) return;
-    const t=this.t, lang=this._hass.language, reading=this._readingSummary, consumption=this._consumptionSummary;
+    const t=this.t, lang=this._hass.language, reading=this._readingSummary;
     reading.replaceChildren(el("h3", t.latest));
     const roles=Object.entries(this._account.roles || {}).filter(([key]) => key.startsWith("account_reading:"));
     if (!roles.length) reading.append(el("p", t.noReading));
@@ -269,8 +296,7 @@ class DtekAccountWorkspaceCard extends HTMLElement {
       reading.append(el("small", t[zoneKey(zone)] || zone), value, el("small", date(state?.attributes?.reading_date, lang)));
     }
     reading.append(el("small", t.readingNote));
-    const usage=this._state("account_consumption:all"), usageValue=el("p", number(usage?.state, lang), "value"); usageValue.append(el("span", t.unit, "unit"));
-    consumption.replaceChildren(el("h3", t.usage), usageValue, el("small", this._period(usage?.attributes?.period)));
+    this._updateConsumption();
     const group=this._groupSummary, state=this._state("account_schedule_status:all"), selected=this._state("account_schedule_groups:all")?.attributes?.selected_groups || [];
     let status=state?.state || "unknown";
     if (["selected","auto_selected","cabinet_selected"].includes(status)) status=state?.attributes?.schedule_status || "current";

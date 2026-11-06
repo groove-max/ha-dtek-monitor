@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.0.0-rc6] - 2026-11-06
+
+**Regular GitHub release**, without the Pre-release flag. Available through the standard HACS update channel. Requires Home Assistant 2026.3.0+.
+
+- Dim elapsed schedule bands on GeekMagic to the left of the current-time marker, while preserving future bands, group labels and selection borders. The boundary follows the display clock, including daylight-saving changes, without additional DTEK polling.
+
+- Clarify that the overview consumption tile is the latest monthly total supplied by DTEK, independent of submitted readings. Highlight its month, explain missing newer totals using Kyiv calendar boundaries, and distinguish missing data from service unavailability without inventing zero consumption. Preserve unchanged tile content during unrelated HA updates.
+
+- Add an optional actual-grid status badge to the GeekMagic example, separate from the schedule countdown and still visible when schedule data is unavailable. Document a generic backed-up grid-sensor helper with freshness checks.
+
+- Add optional schedule display sensors for buildings and personal accounts. Expose today's exact intervals, all group rows, multiple-group highlights and the next relevant scheduled boundary without additional DTEK requests or recording the large grid attribute. Add GeekMagic Hero templates with paged grids, multi-group labels, clock/countdown and animated battery percentage plus signed charging/discharging watts; document setup in English and Ukrainian.
+
+**Upgrade:** update to **2.0.0-rc6**, restart HA and reload its page. Existing accounts, building links, entity IDs and energy calibration are preserved. External display sensors are disabled by default: enable **Schedule display data** on the desired building/account device and follow the guide below. GeekMagic views require the supplied templates; they are not installed automatically. Pair with **Telegram Bot 0.5.0-rc6** for native Telegram menus, automatically updated schedule images and quieter, reliable notifications.
+
+[External displays](docs/DISPLAYS.md) · [Зовнішні дисплеї](docs/DISPLAYS.uk.md) · [Upgrade guide](docs/UPGRADING.md) · [Оновлення](docs/UPGRADING.uk.md)
 
 ## [2.0.0-rc5] - 2026-10-26
 

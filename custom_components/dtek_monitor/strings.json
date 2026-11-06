@@ -726,6 +726,12 @@
       },
       "account_reading_date_night": {
         "name": "Reading date — Night"
+      },
+      "schedule_display": {
+        "name": "Schedule display data"
+      },
+      "account_schedule_display": {
+        "name": "Schedule display data"
       }
     },
     "calendar": {

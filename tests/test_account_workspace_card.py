@@ -373,3 +373,49 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         text = await self.page.locator(".group").inner_text()
         self.assertIn("The cabinet lists several groups: 3.1, 5.1", text)
         self.assertIn("Not selected", text)
+
+    async def test_monthly_summary_explains_older_period_without_replacing_latest_reading(self):
+        await self.page.clock.set_fixed_time("2026-11-04T12:00:00Z")
+        await self.page.evaluate("""() => {
+          hass.states['sensor.reading_1']={state:'12520',attributes:{reading_date:'2026-10-31'}};
+          hass.states['sensor.consumption_1']={state:'7',attributes:{period:'2026-09'}};
+          card.hass=hass;
+        }""")
+        for lang, title, note, period in [
+            ('en','Latest monthly total from DTEK','does not yet include a total for October 2026','September 2026'),
+            ('uk','Останній місячний підсумок ДТЕК','ще немає підсумку за жовтень 2026','вересень 2026'),
+            ('ru','Останній місячний підсумок ДТЕК','ще немає підсумку за жовтень 2026','вересень 2026'),
+        ]:
+            await self.page.evaluate("lang=>{hass.language=lang;card.hass=hass}",lang)
+            summary = await self.page.evaluate("card._consumptionSummary.textContent")
+            self.assertIn(title,summary); self.assertIn(note,summary); self.assertIn(period,summary)
+            self.assertEqual(await self.page.evaluate("card._consumptionSummary.querySelector('.value').firstChild.textContent"),'7')
+            self.assertIn('12520', (await self.page.evaluate("card._readingSummary.textContent")).replace('\u00a0','').replace('\u202f','').replace(',',''))
+        self.assertEqual(await self.page.evaluate("calls.filter(c=>c.type==='dtek_monitor/account_history').length"),0)
+
+    async def test_current_monthly_total_keeps_zero_and_corrections_and_preserves_dom(self):
+        await self.page.clock.set_fixed_time("2026-11-04T12:00:00Z")
+        for value in ['0','-5']:
+            await self.page.evaluate("value=>{hass.states['sensor.consumption_1']={state:value,attributes:{period:'2026-10'}};card.hass=hass}",value)
+            text=await self.page.evaluate("card._consumptionSummary.textContent")
+            self.assertIn('October 2026',text);self.assertNotIn('does not yet include',text)
+            self.assertEqual(await self.page.evaluate("card._consumptionSummary.querySelector('.value').firstChild.textContent"),value)
+        await self.page.evaluate("window.savedUsageNode=card._consumptionSummary.firstChild;card.hass={...hass}")
+        self.assertTrue(await self.page.evaluate("savedUsageNode===card._consumptionSummary.firstChild"))
+
+    async def test_no_monthly_total_is_distinct_from_unavailable_data(self):
+        await self.page.clock.set_fixed_time("2026-11-04T12:00:00Z")
+        for state, period, expected in [
+            ('unknown',None,'No published monthly totals'),
+            ('unavailable','2026-09','temporarily unavailable'),
+            ('7','2026-13','temporarily unavailable'),
+            ('7','2026-11','temporarily unavailable'),
+        ]:
+            await self.page.evaluate("([state,period])=>{hass.states['sensor.consumption_1']={state,attributes:{period}};card.hass=hass}",[state,period])
+            self.assertIn(expected,await self.page.evaluate("card._consumptionSummary.textContent"))
+            self.assertIsNone(await self.page.evaluate("card._consumptionSummary.querySelector('.value')"))
+            self.assertNotIn('does not yet include',await self.page.evaluate("card._consumptionSummary.textContent"))
+
+    async def test_pending_month_uses_kyiv_and_year_rollover(self):
+        for stamp, expected in [('2026-12-31T21:59:59Z','2026-11'),('2026-12-31T22:00:00Z','2026-12'),('2026-10-31T22:00:00Z','2026-10')]:
+            self.assertEqual(await self.page.evaluate("stamp=>card._previousMonth(new Date(stamp))",stamp),expected)

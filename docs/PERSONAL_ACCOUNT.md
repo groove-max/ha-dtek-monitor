@@ -101,6 +101,12 @@ while a submission is pending, switching is blocked. HA updates never insert new
 sensor readings into an edited form. Users without submission rights can view
 history without being offered a submission form.
 
+### Why can the monthly total be older than my latest reading?
+
+**Latest monthly total from DTEK** is consumption for the month printed in that block. It is not the current meter reading or consumption since your last submission. DTEK provides reading history and monthly totals separately; submitting a reading does not immediately create a new monthly total.
+
+For example, in November the latest available total may still be **7 kWh for September**, while the latest reading is dated October 31. The overview explicitly indicates that the received data has no October total yet. When DTEK supplies it, the block switches to October on an account refresh. For individual submissions, open **Readings → Reading history**; for monthly totals, use **Consumption**. Missing monthly data and a failed data request have separate messages; neither is shown as zero.
+
 ### Interface examples
 
 These screenshots use fictional accounts and readings.

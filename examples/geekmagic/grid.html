@@ -1,0 +1,43 @@
+{# Primary entity: DTEK Schedule display data. Each page preserves home rows when practical. #}
+{% set valid = state == 'ready' and attributes.get('schema_version') == 1 and attributes.get('days') and attributes.get('today') == now.strftime('%Y-%m-%d') %}
+{% set power = states('binary_sensor.display_grid_present') if states is defined else 'not_configured' %}
+<style>
+.gm-grid{position:relative;width:100%;height:100%;font-family:'DejaVu Sans',sans-serif;color:#c7d6e5;box-sizing:border-box;padding:0 2px}
+.gm-heading{height:17px;display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:700;color:#e7f2ff}
+.gm-heading small{font-size:8px;font-weight:400;color:#98adbf}
+.gm-axis{height:15px;margin-left:26px;position:relative;color:#8fa5b7;font-size:8px}
+.gm-tick{position:absolute;top:3px;width:16px;text-align:center;margin-left:-8px}
+.gm-table{position:relative}.gm-row{height:10px;display:flex;align-items:center;gap:3px;border-radius:2px;padding:0 1px;box-sizing:border-box}
+.gm-id{width:22px;flex-shrink:0;text-align:center;font-size:8px;color:#9badbf}
+.gm-track{height:6px;flex:1;position:relative;background:#1c2934;border-radius:1px}
+.gm-segment{position:absolute;top:0;height:100%;box-sizing:border-box}
+.gm-past{position:absolute;left:0;top:0;height:100%;background:rgba(12,22,34,.48);pointer-events:none}
+.gm-outage{background:#ac7042}.gm-possible{background:repeating-linear-gradient(45deg,#997039 0px,#997039 1px,#322b22 1px,#322b22 3px)}
+.gm-forecast{background:repeating-linear-gradient(45deg,#596581 0px,#596581 1px,#232c3a 1px,#232c3a 3px)}
+.gm-forecast_clear{background:#293447}.gm-unknown{background:repeating-linear-gradient(45deg,#53606a 0px,#53606a 1px,#1b232b 1px,#1b232b 4px)}
+.gm-home{background:#142b3b}.gm-home .gm-id{color:#a2daff;font-weight:700}.gm-home .gm-outage{background:#f0a24e}
+.gm-selected{border:1px solid #58baff}.gm-selected .gm-id{color:#ffffff}.gm-selected .gm-track{height:5px}
+.gm-now{position:absolute;top:-3px;bottom:0;width:1px;background:#daf2ff}
+.gm-empty{height:calc(100% - 17px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-size:15px;color:#b5c7d9;gap:8px}.gm-empty small{font-size:10px;color:#7f95aa}
+.gm-power{font-size:9px;font-weight:700;padding:2px 4px;border-radius:3px;background:#223142;color:#abbccf}.gm-power-on{background:#113d31;color:#61edb5}.gm-power-off{background:#47242c;color:#ff8b93}
+</style>
+<div class="gm-grid">
+<div class="gm-heading"><span>ГРАФІК · СЬОГОДНІ</span>{% if power == 'not_configured' %}<small>{{ now.strftime('%d.%m') }}</small>{% else %}<span class="gm-power{% if power == 'on' %} gm-power-on{% elif power == 'off' %} gm-power-off{% endif %}">{{ 'СВІТЛО Є' if power == 'on' else 'СВІТЛА НЕМАЄ' if power == 'off' else 'СТАН НЕВІДОМИЙ' }}</span>{% endif %}</div>
+{% if valid %}
+ {% set day = attributes.days[0] %}{% set all_rows = day.rows %}
+ {% set focus = all_rows|selectattr('home')|list %}{% set rest = all_rows|rejectattr('home')|list %}
+ {% if all_rows|length > 12 and focus|length <= 6 %}
+  {% set capacity = 12 - focus|length %}{% set pages = ((rest|length + capacity - 1) // capacity) %}
+  {% set page = (now.timestamp()|int // 20) % pages %}{% set rows = focus + rest[page*capacity:(page+1)*capacity] %}
+ {% else %}
+  {% set pages = [(all_rows|length + 11)//12, 1]|max %}{% set page = (now.timestamp()|int // 20) % pages %}{% set rows = all_rows[page*12:(page+1)*12] %}
+ {% endif %}
+ {% if pages > 1 %}<small style="position:absolute;left:3px;top:20px;font-size:7px;color:#98adbf">{{ page+1 }}/{{ pages }}</small>{% endif %}
+ <div class="gm-axis">{% for tick in day.ticks %}<span class="gm-tick" style="{% if loop.last %}right:0;margin-left:0;text-align:right{% elif loop.first %}left:0;margin-left:0;text-align:left{% else %}left:{{ tick.minute/day.minutes*100 }}%{% endif %}">{{ tick.label }}</span>{% endfor %}</div>
+ <div class="gm-table">
+ {% set elapsed = (now.timestamp()-day.start)/(day.end-day.start) %}
+ {% for row in rows %}<div class="gm-row{% if row.home %} gm-home{% endif %}{% if row.selected %} gm-selected{% endif %}"><span class="gm-id">{{ row.id|replace('GPV','')|e }}</span><div class="gm-track">{% for s in row.segments %}<span class="gm-segment gm-{{ s.kind|e }}" style="left:{{ s.start/day.minutes*100 }}%;width:{{ (s.end-s.start)/day.minutes*100 }}%"></span>{% endfor %}{% if elapsed > 0 and elapsed < 1 %}<span class="gm-past" style="width:{{ elapsed*100 }}%"></span>{% endif %}</div></div>{% endfor %}
+ {% if elapsed >= 0 and elapsed < 1 %}<div class="gm-now" style="left:calc(26px + (100% - 27px) * {{ elapsed }})"></div>{% endif %}
+ </div>
+{% else %}<div class="gm-empty"><span>Графік<br>недоступний</span><small>{% if state == 'unpublished' %}Ще не опубліковано{% elif state == 'error' %}Немає свіжих даних{% else %}Очікуємо дані ДТЕК{% endif %}</small></div>{% endif %}
+</div>

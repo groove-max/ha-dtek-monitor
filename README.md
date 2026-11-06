@@ -160,6 +160,8 @@ You can also attach meter photos in the HA readings form and review them before 
 **Language:** English and Ukrainian are supported. If HA uses Russian, DTEK Monitor shows Ukrainian, including setup, cards and its notifications. HA’s own language stays unchanged.
 
 <a id="data"></a>
+[External displays: GeekMagic Hero](docs/DISPLAYS.md) (available since 2.0.0-rc6).
+
 ## Understand the entities
 
 Entity names follow your Home Assistant language. Open the integration's device page to find their actual IDs; older installations and renamed entities can have different IDs.

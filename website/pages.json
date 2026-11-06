@@ -78,6 +78,21 @@
       }
     },
     {
+      "slug": "displays",
+      "en": {
+        "source": "docs/DISPLAYS.md",
+        "label": "External displays",
+        "title": "DTEK schedules and inverter battery on GeekMagic",
+        "description": "Set up a compact Hero display with all DTEK groups, apartment highlights, a clock, scheduled countdown and signed battery power."
+      },
+      "uk": {
+        "source": "docs/DISPLAYS.uk.md",
+        "label": "Зовнішні дисплеї",
+        "title": "Графік ДТЕК і батарея інвертора на GeekMagic",
+        "description": "Налаштуйте екран Hero: усі групи ДТЕК, виділення своїх груп, годинник, відлік за графіком і потужність заряду або розряду батареї."
+      }
+    },
+    {
       "slug": "reference",
       "en": {
         "source": "docs/REFERENCE.md",

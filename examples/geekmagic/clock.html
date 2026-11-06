@@ -1,0 +1,12 @@
+{% set event = attributes.get('event', {}) if state == 'ready' else {} %}
+{% set at = event.get('at') %}{% set seconds = at - now.timestamp() if at else -1 %}
+{% set minutes = ((seconds + 59)//60)|int %}
+{% set groups = event.get('groups', []) %}
+{% set many = (attributes.get('selected_groups') or attributes.get('building_groups', []))|length > 1 %}
+<style>.gm-clock{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:'DejaVu Sans',sans-serif;background:#111d29;border-radius:6px}.gm-date{font-size:8px;color:#9eb6cb}.gm-time{font-size:23px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#eef6ff}.gm-event{font-size:8px;color:#ffc887;text-align:center;line-height:1.2}.gm-timer{font-size:10px;font-weight:700;color:#ffc887}.gm-nodata{font-size:8px;line-height:1.2;text-align:center;color:#95a7b9}</style>
+<div class="gm-clock"><div class="gm-date">{{ now.strftime('%d.%m') }}</div><div class="gm-time">{{ now.strftime('%H:%M') }}</div>
+{% if at and seconds > 0 %}<div class="gm-event">{{ 'До планового' if event.kind == 'outage_start' else 'Кінець за граф.' }}{% if many and groups %} · {{ groups|join(', ')|replace('GPV','')|e }}{% endif %}</div><div class="gm-timer">{% if minutes >= 60 %}{{ minutes//60 }}г {% endif %}{{ minutes%60 }}хв</div>
+{% elif event.get('kind') == 'selection_required' %}<div class="gm-nodata">Оберіть свої<br>групи в HA</div>
+{% elif event.get('kind') == 'end_unconfirmed' %}<div class="gm-nodata">Кінець ще<br>не підтверджено</div>
+{% elif event.get('kind') == 'no_event_in_coverage' %}<div class="gm-nodata">Наступне ще<br>не опубліковано</div>
+{% else %}<div class="gm-nodata">Очікуємо<br>свіжі дані</div>{% endif %}</div>

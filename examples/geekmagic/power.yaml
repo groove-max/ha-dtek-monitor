@@ -1,0 +1,16 @@
+# Optional HA template helper for a backed-up inverter's GRID input.
+# Replace sensor.grid_frequency with your periodically reporting frequency sensor.
+# Do not use an inverter output, a schedule entity, or a meter that powers off.
+template:
+  - binary_sensor:
+      - name: Display grid present
+        unique_id: display_grid_present
+        device_class: power
+        state: "{{ states('sensor.grid_frequency') | float(0) >= 1 }}"
+        availability: >-
+          {% set s = states.sensor.grid_frequency %}
+          {{ s is not none and is_number(s.state) and s.state | float >= 0
+             and not s.attributes.get('restored', false)
+             and -5 <= as_timestamp(now()) - as_timestamp(s.last_reported) <= 180 }}
+        delay_on: "00:00:30"
+        delay_off: "00:00:10"

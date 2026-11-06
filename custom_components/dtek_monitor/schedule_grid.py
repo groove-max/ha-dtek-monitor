@@ -43,7 +43,7 @@ def _segments(intervals, coverage, group, start, end):
     return result
 
 
-def grid_data(coordinator, selected=(), now=None, *, personal=False):
+def grid_data(coordinator, selected=(), now=None, *, personal=False, day_count=7):
     now = (now or datetime.now(timezone.utc)).astimezone(KYIV_TZ)
     schedule = coordinator.overview
     base = {"time_zone": "Europe/Kyiv", "today": now.date().isoformat(), "days": [], "personal": personal}
@@ -70,7 +70,7 @@ def grid_data(coordinator, selected=(), now=None, *, personal=False):
     )
     days = []
     # Advance in UTC to retain both repeated hours and skip nonexistent hours.
-    for offset in range(7):
+    for offset in range(day_count):
         day = (now + timedelta(days=offset)).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
