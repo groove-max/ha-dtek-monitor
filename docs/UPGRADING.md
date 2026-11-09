@@ -8,13 +8,15 @@ Version 2 adds My DTEK, cabinets for four operators, history, readings and sugge
 
 RC4 adds optional [meter photos and cabinet documents](ENERGY_AND_READINGS.md#attach-a-meter-photo). For these features in Telegram, use **Bot 0.5.0-rc4 or newer**. Update Monitor first and restart HA. New-document notifications must be enabled separately in HA and the bot; an accepted photo does not prove that an inspection act has been issued.
 
-## RC6 update
+## RC7 update
 
-Install **Monitor 2.0.0-rc6**, restart HA and reload its page. Accounts, building links, entity IDs and calibrated energy sources are preserved.
+Install **Monitor 2.0.0-rc7** through the normal HACS update channel, restart HA and reload its page. Existing accounts, building links, entity IDs and calibrated energy sources are preserved. Choose a suitable time for the restart; a release update does not avoid it.
 
-For a small display, enable the optional **Schedule display data** entity and follow the [GeekMagic Hero guide](DISPLAYS.md). It supports several home groups, a current-time marker, dimmed past intervals, an optional actual-power badge and battery widgets. The sensor is disabled by default and makes no additional DTEK requests; the view requires manual template setup.
+Find the new **DTEK announcement** entity on your building device and the announcement block above the schedule. Open it to read the original text, source and check time. Regional announcements are separate from address outages and do not change measured power. A notice can concern only part of an oblast or a particular date.
 
-The overview now clearly labels the latest monthly consumption supplied by DTEK. Its period can lag behind your submitted readings; it is not an estimate of this month’s consumption. Pair with **Bot 0.5.0-rc6** for native Telegram menus, live schedule images and the notification fixes described in the [bot upgrade guide](https://github.com/groove-max/ha-dtek-telegram-bot/blob/main/docs/UPGRADING.md).
+For automations, [check applicability and freshness](SCHEDULES.md#provider-notices), including the unknown (`null`) case. Published calendar events remain available. Only a fresh, unambiguous matching emergency declaration pauses derived schedule predictions; the interpretation is not a structured DTEK API flag.
+
+For the same notices in Telegram, use the optional **Bot 0.5.0-rc7** and review its per-profile announcement controls. The integration works without the bot. Existing [GeekMagic Hero displays](DISPLAYS.md) and the monthly consumption explanation introduced in RC6 remain available.
 
 ## Before updating
 
@@ -61,12 +63,7 @@ Refreshing HACS alone does not install these changes.
 5. **Restart Home Assistant fully**, then reload the browser or HA app page. Reloading the integration alone does not replace all loaded Python modules.
 6. Check the feature described in the issue. For regional announcements, look for the building's **DTEK announcement** entity and the announcement block above its schedule. [States, source and interpretation limits](SCHEDULES.md#provider-notices).
 
-The version can still say **2.0.0-rc6** until the next release. Include the commit
-or archive download date in your feedback. For the announcement changes after
-RC6, you can return to RC6 using HACS **Redownload**, or restore the component
-folder from your backup, then restart HA. For other development changes, check
-their migration notes before rolling back. Once a newer release includes the
-fix, install it normally through HACS.
+Development code can retain the last released version number. Include the commit or archive download date in your feedback. Check the change's migration notes before rolling back and keep the backup made before installing it. Once a release includes the fix, install that release normally through HACS. **Regional announcements are included in RC7; they no longer require `main`.**
 
 ## First checks
 

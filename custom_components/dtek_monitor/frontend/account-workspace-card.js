@@ -1,14 +1,14 @@
-import { noticeLabel } from "./provider-notice.js?v=2.0.0-rc6";
-import "./account-documents.js?v=2.0.0-rc6";
-import "./account-options.js?v=2.0.0-rc6";
-import "./account-energy-settings.js?v=2.0.0-rc6";
-import "./account-profile-card.js?v=2.0.0-rc6";
-import "./account-readings-card.js?v=2.0.0-rc6";
-import "./account-history-card.js?v=2.0.0-rc6";
-import "./schedule-card.js?v=2.0.0-rc6";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc6";
-import { accountNumber } from "./account-number.js?v=2.0.0-rc6";
-import { zoneKey, isUkrainian, languageLocale, cabinetGroupNotice, el, date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc6";
+import { noticeLabel } from "./provider-notice.js?v=2.0.0-rc7";
+import "./account-documents.js?v=2.0.0-rc7";
+import "./account-options.js?v=2.0.0-rc7";
+import "./account-energy-settings.js?v=2.0.0-rc7";
+import "./account-profile-card.js?v=2.0.0-rc7";
+import "./account-readings-card.js?v=2.0.0-rc7";
+import "./account-history-card.js?v=2.0.0-rc7";
+import "./schedule-card.js?v=2.0.0-rc7";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc7";
+import { accountNumber } from "./account-number.js?v=2.0.0-rc7";
+import { zoneKey, isUkrainian, languageLocale, cabinetGroupNotice, el, date, number, embeddedCSS } from "./account-ui.js?v=2.0.0-rc7";
 
 const words = {
   en: {

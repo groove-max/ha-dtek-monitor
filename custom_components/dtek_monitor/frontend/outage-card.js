@@ -1,7 +1,7 @@
-import { renderProviderNotice } from "./provider-notice.js?v=2.0.0-rc6";
-import { outageText } from "./outage-card-text.js?v=2.0.0-rc6";
-import { validateGrid, gridIntervals, slotLabel, endLabel, timelineSegments, clippedSegments, callGridWS } from "./schedule-grid-data.js?v=2.0.0-rc6";
-import "./outage-card-editor.js?v=2.0.0-rc6";
+import { renderProviderNotice } from "./provider-notice.js?v=2.0.0-rc7";
+import { outageText } from "./outage-card-text.js?v=2.0.0-rc7";
+import { validateGrid, gridIntervals, slotLabel, endLabel, timelineSegments, clippedSegments, callGridWS } from "./schedule-grid-data.js?v=2.0.0-rc7";
+import "./outage-card-editor.js?v=2.0.0-rc7";
 /* DTEK compact outage card. Uses verified schedule_grid data from DTEK Monitor. */
 
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

@@ -1,5 +1,5 @@
 /* Official text is primary; interpretation never turns missing notices into all-clear. */
-import { isUkrainian } from "./account-ui.js?v=2.0.0-rc6";
+import { isUkrainian } from "./account-ui.js?v=2.0.0-rc7";
 
 export function noticeSource(attrs) {
   try {

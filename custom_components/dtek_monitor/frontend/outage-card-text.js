@@ -1,4 +1,4 @@
-import { isUkrainian } from "./account-ui.js?v=2.0.0-rc6";
+import { isUkrainian } from "./account-ui.js?v=2.0.0-rc7";
 
 const words = {
   en: {

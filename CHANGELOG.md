@@ -2,11 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [2.0.0-rc7] - 2026-11-09
 
-- Read public regional DTEK announcements separately from schedule publication and measured power. Expose a DTEK announcement entity, original text/source and date-scoped, nullable `schedule_applies` attributes.
-- Recognize unambiguous emergency declarations conservatively; mixed districts, unsupported wording and failed/stale checks remain unconfirmed. Share bounded polling across addresses; do not treat missing markup as no emergency.
-- Show original DTEK announcements in an expandable, stable block with source and check time; distinguish informational notices, matching emergency warnings and retrieval failures. Add an overview shortcut and compact PNG marker. Keep calendars visible; only a fresh, unambiguous emergency interpretation suspends derived forecasts. An empty notice no longer implies schedule applicability.
+**Regular GitHub release**, without the Pre-release flag. Available through the standard HACS update channel. Requires Home Assistant 2026.3.0+.
+
+- Add a separate **DTEK announcement** entity for regional notices from the operator's public shutdowns page. Keep the original text, source link and check time separate from the address outage status and published schedule.
+- Show announcements above the schedule in an expandable block, with an overview shortcut and a compact marker on PNG tables. Distinguish informational notices, matching emergency warnings and failed or expired checks; keep the published timetable visible.
+- Expose nullable `schedule_applies` and per-date `schedule_applicability_days` attributes for automations. These are **our interpretation of DTEK's text**, not a structured API flag. Only a fresh, unambiguous emergency declaration matching the address territory and date pauses timetable-derived forecasts. Mixed/partial-region wording, empty announcements and unavailable checks do not imply an all-clear or cancel every address's schedule. Today's notice is not automatically extended to tomorrow.
+- Share bounded announcement polling across addresses. Missing page markup is an unavailable check, not proof that there is no emergency. Physical power monitoring and raw calendar events remain independent.
+
+**Upgrade:** install **2.0.0-rc7** through HACS, restart HA and reload its page. Accounts, building links, entity IDs and calibration are preserved. No reinstall or new cabinet login is needed. Find **DTEK announcement** on the building device and the notice above the schedule. For Telegram notices and per-profile controls, update the optional companion to **Bot 0.5.0-rc7** after the integration. Updating through HACS still requires an HA restart; choose a suitable maintenance time.
+
+For calendar-based automations, check the applicability and freshness attributes explicitly and handle `null` separately. Retained calendar events alone do not confirm that a timetable is currently in force. The territorial interpretation still needs feedback from more regions and wording examples.
+
+[Announcement behavior and limitations](docs/SCHEDULES.md#provider-notices) · [Оголошення ДТЕК](docs/SCHEDULES.uk.md#provider-notices) · [Upgrade guide](docs/UPGRADING.md) · [Оновлення](docs/UPGRADING.uk.md)
 
 ## [2.0.0-rc6] - 2026-11-06
 

@@ -1,5 +1,5 @@
-import { isUkrainian } from "./account-ui.js?v=2.0.0-rc6";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc6";
+import { isUkrainian } from "./account-ui.js?v=2.0.0-rc7";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc7";
 export async function copyValue(value){
   if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);return;}
   const input=document.createElement('textarea');input.value=value;input.style.cssText='position:fixed;left:-10000px';document.body.append(input);
