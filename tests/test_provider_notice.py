@@ -13,6 +13,8 @@ URL = 'https://www.dtek-dnem.com.ua/ua/shutdowns'
 MIXED = ('У Дніпрі діють екстрені відключення світла.\n'
          'У Павлоградському, Самарівському, Камʼянському та Дніпровському районах — аварійні відключення. Тут графіки не діють.\n'
          'Для решти області продовжуються стабілізаційні відключення.')
+DISTRICT_NOTICE = ('У Павлоградському, частині Самарського та Синельниківського районів - аварійні відключення. '
+                   'Тут графіки не діють. Для решти області стабілізаційні відключення.')
 
 
 def html(text):
@@ -38,6 +40,68 @@ class NoticeTests(unittest.TestCase):
         self.assertEqual(a['provider_notice_scope'], 'city')
         for city in ('м. Павлоград', 'Самар', 'Камʼянське', 'Новодніпровське', ''):
             with self.subTest(city=city): self.assertIsNone(attrs(MIXED, city)['schedule_applies'])
+
+    def test_issue_13_district_notice_is_mixed_without_guessing_address_applicability(self):
+        now=NOW.replace(day=9)
+        notice=mod.ProviderNotice(DISTRICT_NOTICE,now,URL)
+        for city in ('Дніпро','м. Дніпро','Павлоград','Самар','Синельникове',''):
+            for offset in (0,1):
+                with self.subTest(city=city,day_offset=offset):
+                    a=notice.attributes(city,now,day_offset=offset)
+                    self.assertEqual(a['provider_notice_state'],'mixed')
+                    self.assertEqual(a['provider_notice_scope'],'unverified')
+                    self.assertIsNone(a['schedule_applies'])
+                    self.assertEqual(a['provider_notice_text'],DISTRICT_NOTICE)
+                    self.assertEqual(a['provider_notice_source'],URL)
+
+    def test_short_stabilization_statements_classify_the_notice_only(self):
+        for text in (
+            'Стабілізаційні відключення.',
+            'Для решти області стабілізаційні відключення.',
+            'Для решти регіону — стабілізаційні відключення світла.',
+            'Для решти області: стабілізаційні відключення електроенергії.',
+            'На решті території області – стабілізаційні відключення електропостачання.',
+            'Для  решти\u00a0області  стабілізаційні   відключення!',
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(attrs(text)['provider_notice_state'],'stabilization')
+                self.assertIsNone(attrs(text)['schedule_applies'])
+                self.assertEqual(attrs('У Дніпрі діють екстрені відключення. '+text)['provider_notice_state'],'mixed')
+                # A summary-only classification must not supply an all-clear.
+                self.assertIs(attrs('У Дніпрі діють екстрені відключення. '+text)['schedule_applies'],False)
+
+    def test_short_stabilization_advice_negation_and_hypotheses_are_not_declarations(self):
+        for text in (
+            'Для решти області можливі стабілізаційні відключення.',
+            'Для решти області очікуються стабілізаційні відключення.',
+            'Для решти області стабілізаційні відключення скасовано.',
+            'Для решти області — не стабілізаційні відключення.',
+            'Якщо будуть стабілізаційні відключення.',
+            'Будь ласка, враховуйте стабілізаційні відключення.',
+            'Стабілізаційні відключення?',
+            'Вчора для решти області стабілізаційні відключення.',
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(attrs(text)['provider_notice_state'],'notice')
+                self.assertIsNone(attrs(text)['schedule_applies'])
+                self.assertEqual(attrs('У Дніпрі діють екстрені відключення. '+text)['provider_notice_state'],'emergency')
+
+    def test_mixed_short_notice_does_not_override_expiry_or_failure(self):
+        notice=mod.ProviderNotice(DISTRICT_NOTICE,NOW,URL)
+        for value,now in ((notice,NOW+timedelta(minutes=10)), (replace(notice,error='request_failed'),NOW)):
+            a=value.attributes('Дніпро',now)
+            self.assertEqual(a['provider_notice_state'],'unavailable')
+            self.assertIsNone(a['schedule_applies'])
+
+    def test_district_notice_keeps_published_schedule_and_derived_forecast(self):
+        from test_schedule_events import ScheduleEventsTests
+        case=ScheduleEventsTests();case.setUp();case.set_intervals(case.interval(23,24))
+        case.coord.address=SimpleNamespace(city='Дніпро')
+        case.coord.provider_notice=mod.ProviderNotice(DISTRICT_NOTICE,case.now,URL)
+        self.assertEqual(case.coord.provider_notice.state,'mixed')
+        self.assertEqual(case.event().status,'scheduled')
+        self.assertEqual(case.coord.schedule_state,'current')
+        self.assertEqual(len(case.coord.schedule.intervals),1)
 
     def test_precaution_is_not_emergency_and_stable_oem_full_day_is_supported(self):
         stable='За наказом НЕК Укренерго сьогодні з 00:00 до 24:00 діють стабілізаційні відключення електроенергії.'

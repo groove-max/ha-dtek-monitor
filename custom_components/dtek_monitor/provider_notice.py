@@ -77,7 +77,7 @@ def _clauses(text):
     return [s.strip() for s in re.split(r'\n|(?<!м\.)(?<!с\.)(?<=[.!?;])\s+', text) if s.strip()]
 
 
-def _kind(sentence):
+def _kind(sentence, *, allow_ellipsis=False):
     s = _normalize(sentence)
     if re.search(r'уникну|можлив|можуть|будь ласка|не (?:діють|застосовуються|введено) (?:екстрен|аварійн)|скасован|відмінено|скасовано|діяли|вчора|раніше|планується|очікується', s):
         return None
@@ -86,7 +86,15 @@ def _kind(sentence):
     active = re.search(r'діють|введен|запроваджен|застосован|застосовують|тривають|продовжуються', s)
     if re.search(r'(?:екстрен|аварійн)\w*\s+відключен', s) and (active or re.search(r'\s[-–—]\s', s)):
         return 'emergency'
-    if active and re.search(r'стабілізаційн\w*\s+відключен', s):
+    # DTEK also uses short declarations without a verb, e.g. "Для решти
+    # області стабілізаційні відключення". Recognize these in the summary
+    # only; they must not broaden territory/date evidence for applicability.
+    short_stabilization = allow_ellipsis and re.fullmatch(
+        r'(?:(?:для решти|на решті)\s+(?:території\s+)?(?:області|регіону)\s*[-–—:]?\s*)?'
+        r'стабілізаційні\s+відключення(?:\s+(?:світла|електроенергії|електропостачання))?[.!]?',
+        s,
+    )
+    if (active or short_stabilization) and re.search(r'стабілізаційн\w*\s+відключен', s):
         return 'stabilization'
     if re.search(r'фіксуються відключення|відсутнє (?:світло|електропостачання)', s):
         return 'local'
@@ -144,7 +152,7 @@ class ProviderNotice:
             return None
         if not self.text:
             return 'none'
-        kinds = {_kind(s) for s in _clauses(self.text)} - {None}
+        kinds = {_kind(s, allow_ellipsis=True) for s in _clauses(self.text)} - {None}
         if len(kinds) > 1:
             return 'mixed'
         return next(iter(kinds)) if kinds and 'local' not in kinds else 'notice'

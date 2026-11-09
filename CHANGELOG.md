@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Classify regional announcements as `mixed` when emergency districts are followed by a short stabilization declaration such as “Для решти області стабілізаційні відключення”, without requiring a verb. Keep address/date applicability conservative and unchanged; short wording alone never confirms that a schedule applies. Add the exact report from issue #13 and regressions for wording variants, uncertainty, expiry and retained forecasts.
+
 ## [2.0.0-rc7] - 2026-11-09
 
 **Regular GitHub release**, without the Pre-release flag. Available through the standard HACS update channel. Requires Home Assistant 2026.3.0+.
