@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 
 from .schedule import KYIV_TZ
+from .provider_notice import notice_attributes
 
 SCHEDULE_STATUSES = (
     "current",
@@ -75,6 +76,7 @@ def schedule_status(coordinator, groups=None, now=None, *, day_offset=0):
 def status_attributes(coordinator, groups=None, now=None, *, day_offset=0):
     now = now or datetime.now(KYIV_TZ)
     return {
+        **notice_attributes(coordinator, now, day_offset=day_offset),
         "schedule_status": schedule_status(coordinator, groups, now, day_offset=day_offset),
         "status_date": (now.astimezone(KYIV_TZ).date() + timedelta(days=day_offset)).isoformat(),
         "status_timezone": "Europe/Kyiv",

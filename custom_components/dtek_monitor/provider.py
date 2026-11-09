@@ -10,6 +10,7 @@ from typing import Any, Mapping, Protocol
 
 from .schedule import ScheduleWindow
 from .const import EVENT_SUMMARY_OUTAGE, EVENT_SUMMARY_POSSIBLE
+from .provider_notice import ProviderNotice
 
 
 class ProviderError(Exception):
@@ -149,6 +150,7 @@ class RefreshResult:
     schedule_checked_at: datetime | None = None
     # Optional operator-wide display; never drives address calendars or alerts.
     overview: ScheduleReading | None = None
+    notice: ProviderNotice | None = None
 
 
 class OutageProvider(Protocol):

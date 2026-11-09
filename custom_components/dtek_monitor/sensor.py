@@ -23,6 +23,7 @@ from .helpers import build_device_info, build_entity_unique_id, suggested_entity
 from .account import CONF_ENTRY_KIND, ENTRY_ACCOUNT
 from .schedule_status import SCHEDULE_STATUSES, schedule_status, status_attributes
 from .schedule_events import EVENT_SENSOR_KEYS, scheduled_event
+from .provider_notice import NOTICE_STATES, notice_attributes
 from .address_works import WORKS_STATUSES, works_attributes, works_status
 
 
@@ -151,6 +152,7 @@ async def async_setup_entry(
                 for description in SENSOR_DESCRIPTIONS
             ),
             DTEKConnectionSensor(coordinator, entry),
+            DTEKProviderNoticeSensor(coordinator, entry),
             DTEKDisplaySensor(coordinator, entry),
             DTEKWorksStatusSensor(coordinator, entry),
             DTEKScheduleStatusSensor(coordinator, entry),
@@ -209,6 +211,7 @@ class DTEKSensor(CoordinatorEntity[DTEKDataCoordinator], SensorEntity):
         if self.entity_description.key in ("schedule_group", "schedule_groups"):
             attrs.update(
                 {
+                    **notice_attributes(self.coordinator),
                     "schedule_groups": data.get("schedule_groups", []) if data else [],
                     "group_labels_visible": (
                         data.get("group_labels_visible", False) if data else False
@@ -271,6 +274,34 @@ class DTEKConnectionSensor(SensorEntity):
             "consecutive_failures": c.consecutive_failures,
             **c.provider.diagnostics,
         }
+
+
+class DTEKProviderNoticeSensor(DTEKConnectionSensor):
+    """Regional announcement, independent of address/calendar API availability."""
+
+    _attr_translation_key = "provider_notice"
+    _attr_options = list(NOTICE_STATES)
+    _attr_entity_category = None
+    _attr_icon = "mdi:bullhorn-outline"
+    _unrecorded_attributes = frozenset({"provider_notice_text"})
+
+    def __init__(self, coordinator, entry):
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = build_entity_unique_id(entry, "provider_notice")
+        self.entity_id = suggested_entity_id(entry, "sensor", "provider_notice")
+
+    @property
+    def available(self):
+        return self.extra_state_attributes.get("provider_notice_state") in NOTICE_STATES
+
+    @property
+    def native_value(self):
+        value = self.extra_state_attributes.get("provider_notice_state")
+        return value if value in NOTICE_STATES else None
+
+    @property
+    def extra_state_attributes(self):
+        return notice_attributes(self.coordinator)
 
 
 class DTEKWorksStatusSensor(DTEKConnectionSensor):

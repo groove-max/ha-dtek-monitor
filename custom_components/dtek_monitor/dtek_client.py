@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo
 from curl_cffi.requests import AsyncSession
 
 from .public_requests import PublicRequestError, PublicRequestGate, retry_after_seconds
+from .provider_notice import NoticeCache
 
 from .const import (
     DTEK_BASE_URL,
@@ -178,6 +179,9 @@ class DTEKClient:
         self.request_gate = request_gate or PublicRequestGate()
         self.base_url = base_url.rstrip("/")
         self.shutdowns_url = f"{self.base_url}/ua/shutdowns"
+        if not hasattr(self.request_gate, "notice_cache"):
+            self.request_gate.notice_cache = NoticeCache(self.shutdowns_url)
+        self.notice_cache = self.request_gate.notice_cache
         self.ajax_url = f"{self.base_url}/ua/ajax"
         self.xhr_headers = {
             **XHR_HEADERS,
@@ -279,6 +283,7 @@ class DTEKClient:
 
             self._csrf_token = token
             self._session_created = datetime.now(KYIV_TZ)
+            self.notice_cache.capture(html)
 
             schedule = _parse_schedule_from_html(html)
             if schedule:
@@ -391,6 +396,11 @@ class DTEKClient:
         """Run one bounded AJAX operation through the shared operator gate."""
         return await self.request_gate.run(
             lambda: self._post_unlocked(data, retry, require_result)
+        )
+
+    async def get_provider_notice(self):
+        return await self.notice_cache.get(
+            lambda: self.request_gate.run(self._refresh_session)
         )
 
     async def _post_unlocked(

@@ -35,6 +35,60 @@ class GridCardTests(unittest.IsolatedAsyncioTestCase):
         await self.p.stop()
         self.assertEqual(self.errors, [])
 
+    async def test_provider_notice_keeps_grid_safe_source_and_open_details_across_poll(self):
+        await self.page.evaluate("""async () => {
+          const day=data.days[0];Object.assign(day,{schedule_applies:false,provider_notice_state:'emergency',
+            provider_notice_checked_at:new Date().toISOString(),
+            provider_notice_valid_until:new Date(Date.now()+600000).toISOString(),
+            provider_notice_text:'<img src=x onerror="window.injected=true"> Emergency',
+            provider_notice_source:'https://www.dtek-dnem.com.ua/ua/shutdowns'});
+          window.grid=card.shadowRoot.querySelector('dtek-schedule-grid');await grid.load();
+          window.firstRow=grid.shadowRoot.querySelector('tbody tr');
+        }""")
+        warning=self.page.locator('dtek-schedule-grid .provider-notice')
+        self.assertIn('Actual outages may differ', await warning.inner_text())
+        self.assertEqual(await warning.get_attribute('data-tone'), 'warning')
+        await warning.locator('summary').click()
+        self.assertIn('<img src=', await warning.locator('details p').inner_text())
+        self.assertEqual(await warning.locator('img').count(), 0)
+        self.assertEqual(await warning.locator('a').get_attribute('href'), 'https://www.dtek-dnem.com.ua/ua/shutdowns')
+        await self.page.evaluate("async () => {data.days[0].provider_notice_checked_at='new';await grid.load();}")
+        self.assertIsNotNone(await warning.locator('details').get_attribute('open'))
+        self.assertTrue(await self.page.evaluate("firstRow===grid.shadowRoot.querySelector('tbody tr')"))
+        await self.page.evaluate("async () => {data.days[0].provider_notice_valid_until='2000-01-01T00:00:00Z';data.days[0].provider_notice_source='javascript:alert(1)';await grid.load();}")
+        self.assertIn('Could not check DTEK announcements', await warning.inner_text())
+        self.assertIn('Last retrieved announcement', await warning.inner_text())
+        self.assertFalse(await warning.locator('a').is_visible())
+        async with self.page.expect_download():
+            await self.page.get_by_role('button', name='Save PNG', exact=True).click()
+
+    async def test_notice_is_informational_unknown_or_none_without_hiding_schedule(self):
+        await self.page.evaluate("""async () => {
+          window.grid=card.shadowRoot.querySelector('dtek-schedule-grid');
+          Object.assign(data.days[0],{schedule_applies:null,provider_notice_state:'notice',
+            provider_notice_checked_at:'2026-11-09T10:30:00+02:00',
+            provider_notice_valid_until:new Date(Date.now()+600000).toISOString(),
+            provider_notice_text:'Emergency outages in part of another district.\\nCheck the original scope.',
+            provider_notice_source:'https://www.dtek-dnem.com.ua/ua/shutdowns'});
+          await grid.load();
+        }""")
+        box=self.page.locator('dtek-schedule-grid .provider-notice')
+        self.assertEqual(await box.get_attribute('data-tone'), 'info')
+        self.assertIn('Checked: 09.11.2026 10:30', await box.inner_text())
+        self.assertNotIn('paused', await box.inner_text())
+        self.assertTrue(await self.page.locator('table').is_visible())
+        await box.locator('summary').click()
+        await self.page.evaluate("async () => {hass.language='ru';card.hass={...hass};await grid.load();}")
+        self.assertIn('Читати повідомлення', await box.inner_text())
+        self.assertIsNotNone(await box.locator('details').get_attribute('open'))
+        await self.page.evaluate("async () => {Object.assign(data.days[0],{provider_notice_text:'',provider_notice_state:'none'});await grid.load();}")
+        self.assertFalse(await box.is_visible())
+        self.assertTrue(await self.page.locator('table').is_visible())
+        await self.page.evaluate("async () => {data.days[0].provider_notice_state='unavailable';await grid.load();}")
+        self.assertIn('Не вдалося перевірити оголошення ДТЕК', await box.inner_text())
+        self.assertFalse(await box.locator('details').is_visible())
+        self.assertTrue(await self.page.locator('table').is_visible())
+
     async def test_personal_default_with_home_and_all_groups_available(self):
         self.assertEqual(await self.page.locator("tbody tr").count(), 1)
         self.assertEqual(await self.page.get_by_label("Groups", exact=True).input_value(), "mine")

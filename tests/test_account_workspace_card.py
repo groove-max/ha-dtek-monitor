@@ -98,6 +98,20 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         await self.page.get_by_role("tab", name="Readings", exact=True).click()
         self.assertEqual(await field.input_value(), "12503")
 
+    async def test_announcement_shortcut_preserves_focus_and_opens_schedule(self):
+        await self.page.evaluate("""() => {
+          Object.assign(hass.states['sensor.schedule_1'].attributes,{
+            schedule_applies:null,provider_notice_state:'notice',provider_notice_text:'Regional notice',
+            provider_notice_valid_until:new Date(Date.now()+600000).toISOString()});
+          card.hass={...hass};
+        }""")
+        action=self.page.get_by_role('button', name='📢 DTEK announcement available', exact=True)
+        await action.focus()
+        await self.page.evaluate("for(let i=0;i<10;i++)card.hass={...hass}")
+        self.assertTrue(await action.evaluate('e=>e===e.getRootNode().activeElement'))
+        await action.click()
+        self.assertEqual(await self.page.get_by_role('tab', name='Schedule', exact=True).get_attribute('aria-selected'), 'true')
+
     async def test_overview_shortcuts_keep_keyboard_focus_and_existing_draft(self):
         action = self.page.get_by_role("button", name="Enter readings", exact=True)
         await action.focus()

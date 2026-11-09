@@ -732,6 +732,16 @@
       },
       "account_schedule_display": {
         "name": "Schedule display data"
+      },
+      "provider_notice": {
+        "name": "DTEK announcement",
+        "state": {
+          "none": "No announcement",
+          "emergency": "Emergency outages",
+          "stabilization": "Scheduled outages",
+          "mixed": "Mixed regional conditions",
+          "notice": "Announcement"
+        }
       }
     },
     "calendar": {

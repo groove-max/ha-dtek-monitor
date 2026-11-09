@@ -250,6 +250,16 @@ class BotSnapshotTests(unittest.TestCase):
         ):
             return api.account_snapshot(None, self.connection, self.entry, "100001")
 
+    def test_personal_snapshot_exposes_notice_without_changing_cabinet_groups(self):
+        notices=load_component_module('provider_notice')
+        self.coordinator.address.city='Одеса'
+        self.coordinator.provider_notice=notices.ProviderNotice('Діють екстрені відключення.',datetime.now(timezone.utc),'https://www.dtek-oem.com.ua/ua/shutdowns')
+        result=self.snapshot()
+        self.assertEqual(result['groups'],['GPV3.1'])
+        self.assertTrue(result['attributes']['schedule_notifications_ready'])
+        self.assertIs(result['attributes']['schedule_applies'],False)
+        self.assertIn('provider_notice_valid_until',result['attributes'])
+
     def test_manual_and_building_group_do_not_override_cabinet(self):
         result = self.snapshot()
         self.assertEqual(result["groups"], ["GPV3.1"])

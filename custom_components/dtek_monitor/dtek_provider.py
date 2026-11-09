@@ -421,8 +421,11 @@ class DTEKWebProvider:
             self._raw = candidate
         except ProviderError as err:
             schedule_error = str(err)
+        # Optional notice retrieval must not turn a published schedule/address
+        # into a failed setup. Its unknown state is exposed independently.
+        notice = await self._client.get_provider_notice() if hasattr(self._client, "get_provider_notice") else None
         return RefreshResult(
-            reading, schedule, address_error, schedule_error, checked, overview
+            reading, schedule, address_error, schedule_error, checked, overview, notice
         )
 
     async def close(self) -> None:

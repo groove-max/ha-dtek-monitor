@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from .schedule import KYIV_TZ
 from .schedule_events import scheduled_event
 from .schedule_grid import grid_data
+from .provider_notice import notice_attributes
 
 
 def display_data(coordinator, groups=(), *, personal=False, selection_status=None, now=None):
@@ -28,6 +29,7 @@ def display_data(coordinator, groups=(), *, personal=False, selection_status=Non
     }
     if coordinator is None:
         return {**base, "status": "missing"}
+    base.update(notice_attributes(coordinator, now))
     home = list((coordinator.address_data or {}).get("schedule_groups", [])) if coordinator.address_success else []
     base["building_groups"] = home
     grid = grid_data(coordinator, groups, now, personal=personal, day_count=1)

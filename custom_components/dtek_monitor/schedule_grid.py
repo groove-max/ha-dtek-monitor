@@ -44,9 +44,10 @@ def _segments(intervals, coverage, group, start, end):
 
 
 def grid_data(coordinator, selected=(), now=None, *, personal=False, day_count=7):
+    from .provider_notice import notice_attributes
     now = (now or datetime.now(timezone.utc)).astimezone(KYIV_TZ)
     schedule = coordinator.overview
-    base = {"time_zone": "Europe/Kyiv", "today": now.date().isoformat(), "days": [], "personal": personal}
+    base = {"time_zone": "Europe/Kyiv", "today": now.date().isoformat(), "days": [], "personal": personal, **notice_attributes(coordinator, now)}
     if (
         not coordinator.address_success
         or coordinator.address_error
@@ -112,7 +113,8 @@ def grid_data(coordinator, selected=(), now=None, *, personal=False, day_count=7
                     "segments": _segments(intervals, coverage, group.id, day.astimezone(timezone.utc), end),
                 }
             )
-        days.append({"date": day.date().isoformat(), "slots": slots, "rows": rows})
+        days.append({"date": day.date().isoformat(), "slots": slots, "rows": rows,
+                     **notice_attributes(coordinator, now, day_offset=offset)})
     return {
         **base,
         "status": "ready",

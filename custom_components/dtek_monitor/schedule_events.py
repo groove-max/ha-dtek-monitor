@@ -7,6 +7,7 @@ from .localization import is_ukrainian
 from .provider import ScheduleReading
 from .schedule import KYIV_TZ
 from .schedule_status import covers
+from .provider_notice import notice_attributes
 
 EVENT_SENSOR_KEYS = ("next_planned_outage", "next_possible_outage", "scheduled_outage_end")
 
@@ -96,6 +97,9 @@ def scheduled_event(coordinator, key, groups=None, now=None):
         return ScheduledEvent(status="no_groups")
     # UTC comparisons distinguish both occurrences of the repeated autumn hour.
     now = (now or datetime.now(KYIV_TZ)).astimezone(timezone.utc)
+    notice = notice_attributes(coordinator, now)
+    if notice.get('schedule_applies') is False:
+        return ScheduledEvent(status='not_applicable')
     kind = "possible" if key == "next_possible_outage" else "outage"
     horizon = min(_coverage_end(schedule, g, kind, now) for g in groups)
     if horizon <= now:
@@ -116,6 +120,10 @@ def scheduled_event(coordinator, key, groups=None, now=None):
         return ScheduledEvent(status="no_event_in_coverage", coverage_end=horizon)
     is_end = key == "scheduled_outage_end"
     value = min(i.end if is_end else i.start for i in candidates)
+    offset = (value.astimezone(KYIV_TZ).date()-now.astimezone(KYIV_TZ).date()).days
+    target_notice = notice_attributes(coordinator, now, day_offset=offset)
+    if target_notice.get('schedule_applies') is False:
+        return ScheduledEvent(status='not_applicable')
     selected = [i for i in candidates if (i.end if is_end else i.start) == value]
     result = ScheduledEvent(
         value=value, status="scheduled",

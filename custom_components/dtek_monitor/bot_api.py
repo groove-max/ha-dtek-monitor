@@ -86,7 +86,9 @@ def account_snapshot(hass, connection, entry, number):
             [snapshot.snapshot_id if snapshot else None, groups], sort_keys=True
         ).encode()
     ).hexdigest()
+    from .provider_notice import notice_attributes
     attrs = {
+        **notice_attributes(coordinator),
         "schedule_groups": groups,
         # Older bots need this display flag for verified cabinet labels. Keep
         # the website's actual flag separately for newer presentation contexts.

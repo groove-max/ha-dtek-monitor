@@ -51,6 +51,26 @@ class OutageCardTests(unittest.IsolatedAsyncioTestCase):
         }""")
         self.assertEqual(result, [True, True])
 
+    async def test_notice_keeps_expansion_and_selected_group_across_rechecks(self):
+        await self.page.evaluate("""async () => {
+          Object.assign(demoData.days[0],{schedule_applies:null,provider_notice_state:'notice',
+            provider_notice_text:'Оголошення для частини області.',
+            provider_notice_source:'https://www.dtek-oem.com.ua/ua/shutdowns',
+            provider_notice_checked_at:new Date().toISOString(),
+            provider_notice_valid_until:new Date(Date.now()+600000).toISOString()});
+          await card._load();
+        }""")
+        box=self.page.locator('.provider-notice')
+        self.assertEqual(await box.get_attribute('data-tone'), 'info')
+        await box.locator('summary').click()
+        await self.page.locator('select').select_option('GPV1.1')
+        await self.page.evaluate("async () => {demoData.days[0].provider_notice_checked_at=new Date().toISOString();await card._load()}")
+        self.assertIsNotNone(await box.locator('details').get_attribute('open'))
+        self.assertEqual(await self.page.locator('select').input_value(), 'GPV1.1')
+        for width in [320,390,1200]:
+            await self.page.set_viewport_size({'width':width,'height':760})
+            self.assertTrue(await self.page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+
     async def test_reconfiguration_resets_previous_house_group(self):
         await self.page.locator("select").select_option("GPV1.1")
         await self.page.evaluate("card.setConfig({entity:'binary_sensor.other',status_entity:'sensor.other'})")

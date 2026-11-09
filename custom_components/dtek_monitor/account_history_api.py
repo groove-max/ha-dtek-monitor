@@ -141,7 +141,7 @@ async def async_setup_history(hass):
                         str(Path(__file__).parent / "frontend" / f"{name}.js"),
                         False,
                     )
-                    for name in ("outage-card", "outage-card-editor", "outage-card-text", "schedule-grid-data")
+                    for name in ("outage-card", "outage-card-editor", "outage-card-text", "schedule-grid-data", "provider-notice")
                 ],
                 StaticPathConfig(
                     "/dtek_monitor/schedule-card.js",

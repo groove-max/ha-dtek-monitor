@@ -47,6 +47,27 @@ configuration directory. The resulting file must be
 folder after backing it up; do not merge two versions or install a second copy
 under a different name. Restart HA and reload its page.
 
+<a id="main-code"></a>
+## Try a fix from `main` before a release
+
+Use this when an issue comment asks you to test an unreleased change. `main`
+is the development branch; its code may be newer than the version shown in HA.
+Refreshing HACS alone does not install these changes.
+
+1. Make the backup described above and note the commit linked in the issue.
+2. Download the [main source archive](https://github.com/groove-max/ha-dtek-monitor/archive/refs/heads/main.zip) and extract it on your computer. For an exact revision, use the commit archive link provided in the issue.
+3. In that archive, find **`custom_components/dtek_monitor`**. Replace only the same folder inside your HA configuration directory with this complete folder. The final path must be **`custom_components/dtek_monitor/manifest.json`**. Do not copy the whole repository into `custom_components`, or keep a second integration copy there.
+4. Keep your HA configuration, `.storage`, accounts and existing integration entries. There is no need to register or link the address again.
+5. **Restart Home Assistant fully**, then reload the browser or HA app page. Reloading the integration alone does not replace all loaded Python modules.
+6. Check the feature described in the issue. For regional announcements, look for the building's **DTEK announcement** entity and the announcement block above its schedule. [States, source and interpretation limits](SCHEDULES.md#provider-notices).
+
+The version can still say **2.0.0-rc6** until the next release. Include the commit
+or archive download date in your feedback. For the announcement changes after
+RC6, you can return to RC6 using HACS **Redownload**, or restore the component
+folder from your backup, then restart HA. For other development changes, check
+their migration notes before rolling back. Once a newer release includes the
+fix, install it normally through HACS.
+
 ## First checks
 
 - Existing user: check the original address devices, calendars and any bot

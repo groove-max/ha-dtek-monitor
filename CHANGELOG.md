@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Read public regional DTEK announcements separately from schedule publication and measured power. Expose a DTEK announcement entity, original text/source and date-scoped, nullable `schedule_applies` attributes.
+- Recognize unambiguous emergency declarations conservatively; mixed districts, unsupported wording and failed/stale checks remain unconfirmed. Share bounded polling across addresses; do not treat missing markup as no emergency.
+- Show original DTEK announcements in an expandable, stable block with source and check time; distinguish informational notices, matching emergency warnings and retrieval failures. Add an overview shortcut and compact PNG marker. Keep calendars visible; only a fresh, unambiguous emergency interpretation suspends derived forecasts. An empty notice no longer implies schedule applicability.
+
 ## [2.0.0-rc6] - 2026-11-06
 
 **Regular GitHub release**, without the Pre-release flag. Available through the standard HACS update channel. Requires Home Assistant 2026.3.0+.

@@ -10,6 +10,7 @@ A schedule is the operator's plan, not a measurement of electricity at home.
 - [Address repair works](#address-works)
 - [Upcoming times and tomorrow's schedule](#upcoming-times)
 - [Refresh and change notifications](#changes)
+- [Regional DTEK announcements](#provider-notices)
 
 <a id="section-1"></a>
 ## Schedule grid
@@ -243,3 +244,53 @@ DTEK may publish a repair only after it has started. End times are estimates and
 change. Events disappear when removed from the current response: this is not a history
 archive. An empty future calendar does not guarantee that no repairs will occur.
 This calendar does not automatically enable new Telegram notifications.
+
+<a id="provider-notices"></a>
+## Regional announcements and emergency outages
+
+The **DTEK announcement** block above the schedule shows a message from your
+operator's public website. Open **Read announcement** to see the original text
+and follow the link to DTEK. **Checked** is the time HA last retrieved the text,
+not its publication time. The overview has a shortcut to this section.
+
+- **Information:** an announcement is available. Read its territory and dates;
+  it may concern only part of the region. The timetable stays visible.
+- **Yellow warning:** the text unambiguously reports emergency outages for your
+  city or the operator's territory on the selected date. Actual outages may
+  differ from the timetable. Derived next-outage/end timestamps and countdowns
+  pause while that interpretation remains fresh.
+- **Could not check announcements:** retrieval failed, the page format changed,
+  or the last check expired. This is separate from schedule availability and
+  does not pause forecasts by itself. Previously retrieved text, when available,
+  is labelled **Last retrieved announcement**.
+- **No announcement:** the block is hidden. This does not guarantee that the
+  timetable applies or that your building has power.
+
+Territory/date recognition uses text rules, not a structured DTEK API field.
+Ambiguous districts, partial-day conditions and unsupported wording remain
+undetermined. We do not guess a locality's district. These cases do not suspend
+forecasts. Original text and a source link remain available for you to check.
+Measured power/voltage and published schedule/calendar data stay independent.
+
+The updated Telegram add-on includes a short notice and source link in status
+and schedule-change messages. PNG tables carry a compact announcement marker;
+the Telegram caption links to the source. Rechecking unchanged text does not
+send a new notification. Only a fresh, unambiguous emergency warning pauses
+upcoming-outage alerts and timetable-derived restoration estimates.
+
+Notices are checked at most once per five minutes per operator, shared across
+addresses. Failed requests retry no sooner than one minute. After ten minutes
+without a successful check, or at midnight, an interpretation expires; it no
+longer suspends forecasts. The timetable keeps its own update interval. Existing
+GeekMagic views can use the updated clock template from the [display guide](DISPLAYS.md).
+
+For automations, the announcement entity exposes original text, source URL,
+check time and the additional recognized type (`none`, `emergency`,
+`stabilization`, `mixed`, or `notice` for undetermined/other wording). Failed or
+expired checks make this entity unavailable. `schedule_applies` is **our text
+interpretation for the address/date**: `false` is an unambiguous emergency
+suspension, `true` is an explicit matching stabilization declaration, and `null`
+means no conclusion, including when there is no announcement. The
+`provider_notice_interpretation: text_rules` attribute identifies this method.
+Per-date values are available in `schedule_applicability_days`. Neither a type
+nor an applicability value is a physical power measurement or a guarantee.

@@ -60,6 +60,7 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._schedule_update_time: str = ""
         self.schedule: ScheduleReading | None = None
         self.overview: ScheduleReading | None = None
+        self.provider_notice = None
         self.schedule_state = "missing"
         self.schedule_reason: str | None = None
         self.address = Address(
@@ -157,13 +158,15 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._cancel_clock()
             self._cancel_clock = None
         if self._clock_started:
-            self._cancel_clock = async_track_point_in_utc_time(
-                self.hass, self._clock_tick,
-                next_schedule_boundary(
-                    self.schedule if self.notifications_ready else None,
-                    dt.datetime.now(dt.timezone.utc),
-                ),
-            )
+            from .provider_notice import MAX_AGE
+            now = dt.datetime.now(dt.timezone.utc)
+            boundary = next_schedule_boundary(self.schedule if self.notifications_ready else None, now)
+            notice = self.provider_notice
+            if notice and notice.checked_at and not notice.error:
+                expiry = notice.checked_at + MAX_AGE
+                if expiry > now:
+                    boundary = min(boundary, expiry)
+            self._cancel_clock = async_track_point_in_utc_time(self.hass, self._clock_tick, boundary)
 
     @callback
     def _clock_tick(self, now):
@@ -182,8 +185,10 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     @property
     def snapshot_attributes(self) -> dict[str, Any]:
+        from .provider_notice import notice_attributes
         snapshot = self.snapshot
         return {
+            **notice_attributes(self),
             "data_status": (
                 "current"
                 if self.notifications_ready
@@ -306,6 +311,7 @@ class DTEKDataCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             result = await self.provider.refresh(
                 self.address, start, start + timedelta(days=SNAPSHOT_DAYS)
             )
+            self.provider_notice = result.notice
         except ProviderError as err:
             self.address_error = self.schedule_error = str(err)
             raise

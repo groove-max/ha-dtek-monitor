@@ -1,3 +1,4 @@
+import { noticeLabel } from "./provider-notice.js?v=2.0.0-rc6";
 import "./account-documents.js?v=2.0.0-rc6";
 import "./account-options.js?v=2.0.0-rc6";
 import "./account-energy-settings.js?v=2.0.0-rc6";
@@ -251,7 +252,9 @@ class DtekAccountWorkspaceCard extends HTMLElement {
     reading.append(this._readingSummary);
     if (this._account.can_submit) reading.append(this._button(this.t.send, () => navigate("readings"), "context-action"));
     consumption.append(this._consumptionSummary);tiles.append(reading,consumption);
-    group.append(this._groupSummary,this._button(this.t.scheduleLink, () => navigate("schedule"), "context-action"));
+    this._providerNoticeAction=this._button("", () => navigate("schedule"), "context-action provider-notice-link");
+    this._providerNoticeAction.hidden=true;
+    group.append(this._groupSummary,this._providerNoticeAction,this._button(this.t.scheduleLink, () => navigate("schedule"), "context-action"));
     this._overview.append(tiles,group,this._overviewStamp);panel.append(this._overview);
     if (!this._account.can_submit) panel.append(el("p", this.t.viewOnly, "muted"));
     this._updateOverview();
@@ -305,6 +308,10 @@ class DtekAccountWorkspaceCard extends HTMLElement {
     const source=state?.attributes?.selection_source, candidates=state?.attributes?.verified_cabinet_groups || [];
     if(source) group.append(el("small", t[`groupSource_${source}`] || ""));
     if(!selected.length && candidates.length>1) group.append(el("small", `${t.groupCandidates}: ${candidates.map(g=>g.replace(/^GPV/, "")).join(", ")}`));
+    const announcement=noticeLabel(state?.attributes,lang);
+    this._providerNoticeAction.hidden=!announcement;
+    const noticeLabelText=announcement?`📢 ${announcement}`:"";
+    if(this._providerNoticeAction.textContent!==noticeLabelText)this._providerNoticeAction.textContent=noticeLabelText;
     const notice=cabinetGroupNotice(state?.attributes,lang);
     if(notice) group.append(el("p",notice,"group-notice"));
     const updated=this._state("account_updated:all") || this._hass.states?.[this._entity];
