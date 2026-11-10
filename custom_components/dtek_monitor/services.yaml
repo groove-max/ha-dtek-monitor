@@ -1,0 +1,18 @@
+refresh_bot_status:
+  fields:
+    profile:
+      required: true
+      selector:
+        select:
+          options: []
+send_bot_status:
+  fields:
+    profile:
+      required: true
+      selector:
+        select:
+          options: []
+    silent:
+      default: true
+      selector:
+        boolean:

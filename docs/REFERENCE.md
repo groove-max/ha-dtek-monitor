@@ -236,3 +236,26 @@ status `entity_id`, requiring control permission on that entity and read access 
 both associated calendars. All manual requests for a building share a one-minute
 limit and respect operator-wide cooldowns. A successful request without a published
 schedule stays distinguishable from a request failure or a verified empty day.
+
+
+<a id="telegram-status-actions"></a>
+## Telegram status from HA automations
+
+**Available with Monitor 2.0.0-rc8 + Bot 0.5.0-rc9 or newer.** Update both components; Bot 0.5.0-rc8 alone does not include these actions. Existing schedules and accounts continue to work without them.
+
+In **Settings → Automations & scenes**, create an automation, add a trigger and choose a DTEK action:
+
+| Action | Result |
+| --- | --- |
+| `dtek_monitor.refresh_bot_status` — Refresh pinned bot status | Updates the reusable status. Requires enabled `pinned_edit` mode. |
+| `dtek_monitor.send_bot_status` — Send current bot status | Sends a separate message, even when automatic status is disabled. Silent by default; turn off **Silent** for a notification sound. |
+
+Select **Bot profile** from the list of connected buildings or personal accounts. The add-on supplies its active profiles automatically. After starting it, allow up to 30 seconds and reopen the action editor. No token, chat_id or add-on network address is required. Refresh lists only profiles with reusable status enabled.
+
+Actions use the selected profile’s current status templates and all configured recipients. Personal data stays in authorized private chats; the action cannot override recipients. Administrators and HA automations may run these actions. No new rules or notifications are enabled automatically.
+
+For example, add battery charge to all four status templates, select **Numeric state → below 30**, require it to remain there for one minute, then **Send current bot status**. This fires on a crossing below 30, not every reading. Configure additional thresholds, conditions and recovery rules in HA. Never convert `unavailable`/`unknown` to zero. Restarting HA or reloading automations resets a pending `for` duration.
+
+Pinned refresh respects the profile’s minimum interval; separate sends allow one request per profile every 10 seconds. The action waits up to 60 seconds for acknowledgement. Partial delivery, a disconnected add-on or an unconfirmed outcome appears as an error in the automation trace. Check Telegram before resending: a lost acknowledgement does not always mean a lost message. Expired commands are not replayed after reconnection, and an already received request is not resent after a restart.
+
+[Template examples and bot setup](https://github.com/groove-max/ha-dtek-telegram-bot/blob/main/DOCS.md#ha-status-actions).

@@ -2,9 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [2.0.0-rc8] - 2026-11-10
+
+**Regular GitHub release**, without the Pre-release flag. Requires Home Assistant 2026.3.0+. Status automation actions require **DTEK Monitor 2.0.0-rc8 + DTEK Telegram Bot 0.5.0-rc9**. Existing features retain their earlier compatibility.
+
+- Add native actions to refresh a pinned Telegram status or send the current status to a selected connected profile. Use an authenticated WebSocket bridge with recipient isolation, delivery acknowledgements, explicit errors and live profile selectors. Requires the companion bot update; no automation rules are enabled automatically.
 
 - Classify regional announcements as `mixed` when emergency districts are followed by a short stabilization declaration such as “Для решти області стабілізаційні відключення”, without requiring a verb. Keep address/date applicability conservative and unchanged; short wording alone never confirms that a schedule applies. Add the exact report from issue #13 and regressions for wording variants, uncertainty, expiry and retained forecasts.
+
+
+**Upgrade:** update Monitor through HACS and restart HA, then update the bot through the HA app store and restart the app. Existing profiles, recipients, templates and status IDs are preserved. No new automation or notification is enabled automatically. Allow up to 30 seconds for profiles to appear in the native HA action selector.
+
+**Validation:** 640 bot tests and 832 integration tests passed locally, including the new actions on HA 2026.3.0. An isolated cross-component check verified rendered sensor values, editing the same status message and duplicate suppression after a process restart.
+
+[Telegram status actions](docs/REFERENCE.md#telegram-status-actions) · [Дії статусу Telegram](docs/REFERENCE.uk.md#telegram-status-actions)
 
 ## [2.0.0-rc7] - 2026-11-09
 

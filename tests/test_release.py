@@ -95,6 +95,7 @@ class ReleaseTests(unittest.TestCase):
             "NOTICE",
             "THIRD_PARTY_NOTICES.md",
             "__init__.py",
+            "services.yaml",
         ]
         for name in names[1:]:
             (self.component / name).write_text("public")
@@ -107,3 +108,8 @@ class ReleaseTests(unittest.TestCase):
             release.package(self.root, archive)
         with ZipFile(archive) as package:
             self.assertEqual(set(package.namelist()), set(names))
+        # Permit the public HA action definitions, not arbitrary YAML configs.
+        with patch.object(release.subprocess, "check_output", return_value=tracked +
+                          str(release.COMPONENT / "secrets.yaml").encode() + b"\0"):
+            with self.assertRaises(ValueError):
+                release.package(self.root, archive)

@@ -824,6 +824,27 @@
     },
     "schedule_refresh_failed": {
       "message": "Could not refresh the DTEK schedule. Check the connection status; the integration will retry automatically."
+    },
+    "bot_status_offline": {
+      "message": "The Telegram add-on is disconnected. Start it and try again."
+    },
+    "bot_status_disabled": {
+      "message": "Enable reusable pinned status for this profile before refreshing it."
+    },
+    "bot_status_rate_limited": {
+      "message": "Status requests are too frequent. Wait before trying again."
+    },
+    "bot_status_expired": {
+      "message": "The request expired before delivery. Check the add-on connection."
+    },
+    "bot_status_unknown": {
+      "message": "Delivery could not be confirmed. Check Telegram before sending again."
+    },
+    "bot_status_partial": {
+      "message": "Only some recipients received the status. Check Telegram before retrying."
+    },
+    "bot_status_failed": {
+      "message": "The status could not be delivered. Check the Telegram add-on diagnostics."
     }
   },
   "selector": {
@@ -848,6 +869,32 @@
     "account_groups_api_changed": {
       "title": "Legacy cabinet group lookup needs an update",
       "description": "The optional account-group service is unavailable or its response format changed ({reason}). This affects group lookup through the legacy cabinet. Meter data, reading submission and building schedules work independently. You can choose your group manually or disable cabinet lookup in group settings.\n\nCheck [integration updates]({releases_url}). If you already use the latest version, [report the issue]({issues_url}) with the reason and interface: {interface}. Omit credentials and full account numbers. This issue clears after recovery or after lookup is disabled for this connection."
+    }
+  },
+  "services": {
+    "refresh_bot_status": {
+      "name": "Refresh pinned bot status",
+      "description": "Uses the profile’s templates and configured recipients.",
+      "fields": {
+        "profile": {
+          "name": "Bot profile",
+          "description": "Choose a connected building or personal account profile."
+        }
+      }
+    },
+    "send_bot_status": {
+      "name": "Send current bot status",
+      "description": "Uses the profile’s templates and configured recipients.",
+      "fields": {
+        "profile": {
+          "name": "Bot profile",
+          "description": "Choose a connected building or personal account profile."
+        },
+        "silent": {
+          "name": "Silent",
+          "description": "Send without a Telegram notification sound."
+        }
+      }
     }
   }
 }

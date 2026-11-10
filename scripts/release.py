@@ -90,7 +90,8 @@ def package(root: Path, target: Path) -> None:
         if (
             (root / path).is_symlink()
             or "__pycache__" in path.parts
-            or path.suffix not in {".py", ".js", ".json", ".png", ".md", ""}
+            or (path.suffix not in {".py", ".js", ".json", ".png", ".md", ""}
+                and path != COMPONENT / "services.yaml")
         ):
             raise ValueError(f"Unexpected release file: {path}")
     with ZipFile(target, "w", ZIP_DEFLATED) as archive:

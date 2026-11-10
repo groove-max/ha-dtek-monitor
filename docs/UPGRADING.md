@@ -8,6 +8,14 @@ Version 2 adds My DTEK, cabinets for four operators, history, readings and sugge
 
 RC4 adds optional [meter photos and cabinet documents](ENERGY_AND_READINGS.md#attach-a-meter-photo). For these features in Telegram, use **Bot 0.5.0-rc4 or newer**. Update Monitor first and restart HA. New-document notifications must be enabled separately in HA and the bot; an accepted photo does not prove that an inspection act has been issued.
 
+## RC8 update
+
+Install **Monitor 2.0.0-rc8** through HACS and restart HA, then update **Bot to 0.5.0-rc9** in the HA app store and start it. Both are regular releases without Pre-release. New actions send the current status or refresh its pinned message from any HA automation. Select a profile from the list; recipients and templates are preserved. No new automation is enabled automatically.
+
+Allow up to 30 seconds after bot startup, then reopen the action editor. Rolling either component back disables these actions; disable the corresponding automations. Existing notifications keep working. Preserve app data, including `status_action_instance` and `status_actions.sqlite`, to keep profile identity and duplicate-delivery protection.
+
+[Action setup](REFERENCE.md#telegram-status-actions).
+
 ## RC7 update
 
 Install **Monitor 2.0.0-rc7** through the normal HACS update channel, restart HA and reload its page. Existing accounts, building links, entity IDs and calibrated energy sources are preserved. Choose a suitable time for the restart; a release update does not avoid it.

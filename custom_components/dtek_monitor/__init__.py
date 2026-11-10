@@ -33,8 +33,10 @@ ACCOUNT_PLATFORMS = [Platform.SENSOR, Platform.BUTTON, Platform.CALENDAR]
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     from .account_history_api import async_setup_history
+    from .bot_status import async_setup_status_actions
 
     await async_setup_history(hass)
+    async_setup_status_actions(hass)
     return True
 
 

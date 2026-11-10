@@ -1,7 +1,7 @@
-import { zoneKey, isUkrainian,  embeddedCSS, date } from "./account-ui.js?v=2.0.0-rc7";
-import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc7";
+import { zoneKey, isUkrainian,  embeddedCSS, date } from "./account-ui.js?v=2.0.0-rc8";
+import { accountCardEditor } from "./account-card-editor.js?v=2.0.0-rc8";
 /* DTEK account history. No external assets or credentials in the browser. */
-import { accountNumber, cabinetLink } from "./account-number.js?v=2.0.0-rc7";
+import { accountNumber, cabinetLink } from "./account-number.js?v=2.0.0-rc8";
 const words = {
   en: {
     photo: "📷 Photo available in DTEK", photoOpen: "Open photos in the DTEK cabinet", controller: "Controller comment",

@@ -219,3 +219,5 @@ Do not repeatedly remove and re-add an address to recover from a temporary websi
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md).
 
 Licensed under [PolyForm Noncommercial 1.0.0](LICENSE). Noncommercial use, modification and redistribution are permitted under its terms; commercial use is not granted. This is source-available software, not an OSI open-source license. Earlier MIT releases retain their original terms. Dependencies keep their own licenses. See [NOTICE](NOTICE).
+
+[Control Telegram status from HA automations](docs/REFERENCE.md#telegram-status-actions) — Monitor 2.0.0-rc8 + Bot 0.5.0-rc9.

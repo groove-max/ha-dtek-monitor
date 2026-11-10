@@ -1,6 +1,6 @@
-import { renderProviderNotice } from "./provider-notice.js?v=2.0.0-rc7";
-import { isUkrainian, cabinetGroupNotice, embeddedCSS } from "./account-ui.js?v=2.0.0-rc7";
-import "./schedule-grid.js?v=2.0.0-rc7";
+import { renderProviderNotice } from "./provider-notice.js?v=2.0.0-rc8";
+import { isUkrainian, cabinetGroupNotice, embeddedCSS } from "./account-ui.js?v=2.0.0-rc8";
+import "./schedule-grid.js?v=2.0.0-rc8";
 /* Publication status remains visible when HA's calendar cannot show events. */
 class DtekScheduleCard extends HTMLElement {
   constructor() {
