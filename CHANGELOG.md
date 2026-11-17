@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- Fix cabinet reading history when DTEK ignores the requested year and returns records from multiple years ([#14](https://github.com/groove-max/ha-dtek-monitor/issues/14)). Filter by the Kyiv calendar year, continue through pages containing only other years, and enforce the row limit on all received records. Retain future-date, pagination and conflicting-record checks. Applies to the shared cabinet client without relying on optional response metadata.
+
 ## [2.0.0-rc8] - 2026-11-10
 
 **Regular GitHub release**, without the Pre-release flag. Requires Home Assistant 2026.3.0+. Status automation actions require **DTEK Monitor 2.0.0-rc8 + DTEK Telegram Bot 0.5.0-rc9**. Existing features retain their earlier compatibility.

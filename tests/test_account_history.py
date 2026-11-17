@@ -124,6 +124,42 @@ class HistoryParsingTests(unittest.TestCase):
                 history.parse_history_page(payload, 2026, TODAY)
         self.assertEqual(history.parse_history_page(page(total=0), 2026, TODAY)[2], [])
 
+    def test_mixed_years_are_filtered_with_or_without_optional_metadata(self):
+        payload = page(
+            row("older", stamp="2023-12-31T12:00:00"),
+            row("previous", stamp="2025-09-30T12:00:00"),
+            row("day", deviceScaleType="DAY", isInactive=True),
+            row("night", deviceScaleType="NIGHT", isBlocked=True),
+        )
+        for metadata in (None, {"years": ["2026", "2025", "2024", "2023"],
+                                "deviceCombinedTypes": ["ACTIVE:GENERAL"],
+                                "source": ["FROM_CLIENT", "CONTROL_READING"]}):
+            with self.subTest(metadata=metadata):
+                candidate = deepcopy(payload)
+                if metadata is not None:
+                    candidate["metadata"] = metadata
+                original = deepcopy(candidate)
+                for year, expected in ((2026, ["day", "night"]), (2025, ["previous"]),
+                                       (2024, []), (2023, ["older"])):
+                    returned_page, pages, rows = history.parse_history_page(candidate, year, TODAY)
+                    self.assertEqual((returned_page, pages), (1, 1))
+                    self.assertEqual([identity for identity, _ in rows], expected)
+                    if year == 2026:
+                        self.assertEqual([(r["zone"], r["status"]) for _, r in rows],
+                                         [("DAY", "inactive"), ("NIGHT", "blocked")])
+                self.assertEqual(candidate, original)
+
+    def test_year_filter_uses_kyiv_date_on_both_sides_of_new_year(self):
+        payload = page(row("current", stamp="2025-12-31T23:15:00+00:00"),
+                       row("previous", stamp="2026-01-01T00:30:00+03:00"))
+        self.assertEqual([identity for identity, _ in history.parse_history_page(payload, 2026, TODAY)[2]], ["current"])
+        self.assertEqual([identity for identity, _ in history.parse_history_page(payload, 2025, TODAY)[2]], ["previous"])
+
+    def test_filter_never_hides_future_or_invalid_dates_in_other_years(self):
+        for stamp in ("2026-10-19T12:00:00", "2027-01-01T00:00:00", "not-a-date"):
+            with self.subTest(stamp=stamp), self.assertRaises(account.AccountError):
+                history.parse_history_page(page(row(stamp=stamp)), 2025, TODAY)
+
     def test_months_keep_signed_zones_and_mark_gaps_open_future(self):
         payload = months(
             month(
@@ -219,6 +255,55 @@ class HistoryClientTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(account.AccountError):
                 await self.client.read_history("100001", 2026)
             self.assertEqual(self.client._get.await_count, 2)
+
+    async def test_other_year_pages_before_and_after_requested_rows_are_not_empty(self):
+        self.client._get = AsyncMock(side_effect=[
+            page(row("old", stamp="2023-01-01T12:00:00"), total=3),
+            page(row("current"), number=2, total=3),
+            page(row("previous", stamp="2025-01-01T12:00:00"), number=3, total=3),
+            months(month()),
+        ])
+        result = await self.client.read_history("100001", 2026)
+        self.assertEqual(len(result["readings"]), 1)
+        self.assertEqual(result["readings"][0]["date_time"], "2026-09-30T23:59:00+03:00")
+        self.assertEqual(result["months"][8]["value"], "-12")
+        requests = self.client._get.call_args_list
+        self.assertEqual(len(requests), 4)
+        self.assertEqual([call.kwargs["params"]["page"] for call in requests[:3]], [1, 2, 3])
+        self.assertTrue(all(call.kwargs["params"]["year"] == 2026 for call in requests))
+
+    async def test_absent_requested_year_is_empty_only_after_all_pages_are_read(self):
+        self.client._get = AsyncMock(side_effect=[
+            page(row("old", stamp="2023-01-01T12:00:00"), total=2),
+            page(row("current"), number=2, total=2),
+            months(month("2025-09", 7)),
+        ])
+        result = await self.client.read_history("100001", 2025)
+        self.assertEqual(result["readings"], [])
+        self.assertEqual(result["months"][8]["value"], "7")
+        self.assertEqual(self.client._get.await_count, 3)
+
+    async def test_raw_row_limit_also_counts_records_removed_by_year_filter(self):
+        self.client._get = AsyncMock(side_effect=[
+            page(row("a", stamp="2024-01-01T12:00:00"),
+                 row("b", stamp="2024-01-02T12:00:00"), total=2),
+            page(row("c", stamp="2025-01-01T12:00:00"),
+                 row("d", stamp="2025-01-02T12:00:00"), number=2, total=2),
+        ])
+        with patch.object(client_module, "MAX_HISTORY_ROWS", 3):
+            with self.assertRaisesRegex(account.AccountError, "excessive history"):
+                await self.client.read_history("100001", 2026)
+        self.assertEqual(self.client._get.await_count, 2)
+
+    async def test_failed_or_empty_page_after_other_year_rows_is_not_success(self):
+        for second in (page(number=2, total=2), account.AccountError("down")):
+            with self.subTest(second=second):
+                self.client._get = AsyncMock(side_effect=[
+                    page(row(stamp="2025-01-01T12:00:00"), total=2), second,
+                ])
+                with self.assertRaises(account.AccountError):
+                    await self.client.read_history("100001", 2026)
+                self.assertEqual(self.client._get.await_count, 2)
 
     async def test_api_failure_and_excessive_history_do_not_return_partial_results(
         self,

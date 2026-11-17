@@ -499,8 +499,10 @@ class DTEKAccountClient(AccountLinksClientMixin, AccountGroupAuthorizationMixin)
             ):
                 raise AccountError("History changed during pagination; retry later")
             expected_pages = pages
-            raw_count += len(rows)
-            if raw_count > MAX_HISTORY_ROWS or (pages > 1 and not rows):
+            # An entire page may belong to other years. Bound the received data,
+            # not the locally filtered subset, and continue to subsequent pages.
+            raw_count += len(payload["data"])
+            if raw_count > MAX_HISTORY_ROWS or (pages > 1 and not payload["data"]):
                 raise AccountError("Incomplete or excessive history response")
             for identity, row in rows:
                 if identity in records and records[identity] != row:

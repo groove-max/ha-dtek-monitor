@@ -98,8 +98,12 @@ def parse_history_page(payload, year: int, today: date):
             if stamp.tzinfo is None
             else stamp.astimezone(KYIV)
         )
-        if stamp.year != year or stamp.date() > today:
+        if stamp.date() > today:
             raise AccountError("History record outside the requested period")
+        # Some cabinets ignore the year query and paginate the complete history.
+        # Compare the Kyiv date, retaining future-date validation before filtering.
+        if stamp.year != year:
+            continue
         value = _number(item.get("value"))
         if value < 0:
             raise AccountError("Invalid historical meter reading")
